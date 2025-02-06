@@ -514,6 +514,31 @@ process samtools_bl_index {
     """
 }
 
+process random_test_j {
+
+
+    input:
+
+    tuple val(fastq_name), path(fastq)
+
+
+    output:
+
+
+    script:
+
+    """
+    #!/usr/bin/env bash
+
+    echo "this is the file name: ${fastq_name}; this is the forward read (r1): ${fastq[0]}; this is the reverse read(r2): ${fastq[1]}"
+
+
+
+
+    """
+
+}
+
 workflow {
 
     // this is the end seq alignment steps first
@@ -687,10 +712,25 @@ workflow {
                 bed_files_norm_ch = deeptools_make_bed_SE.out.bed_files_normalized
             }
     
+
+            // i will either use the bams or the bed files for any future processes depending on what tool needs what.
     }
 
-    //else if (params.PE) {
+    // now I need to make the paired-end part of this pipeline.
+    else if (params.PE) {
+
+        // this will take the paired end reads and keep them together
+        params.paired_end_reads = '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*'
+
+        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
+
+        pe_fastqs_ch.view()
+
+        random_test_j(pe_fastqs_ch.take(3))
+
+        // now i need to make the parameters for if the paired end fastq files will have the adapter sequence known or not and if the bam file will be blacklist filtered or not
 
 
-    //}
+
+    }
 }
