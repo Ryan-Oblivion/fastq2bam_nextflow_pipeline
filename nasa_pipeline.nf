@@ -514,8 +514,9 @@ process samtools_bl_index {
     """
 }
 
-process random_test_j {
+process fastp_PE {
 
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
     input:
 
@@ -527,13 +528,66 @@ process random_test_j {
 
     script:
 
+    out_name_1 = "${fastq_name}_filt_R1_0.fastq"
+    out_name_2 = "${fastq_name}_filt_R2_0.fastq"
+    failed_reads_file = "${fastq_name}_failed_filter_reads.fastq"
+    merged_reads_file = "${fastq_name}_merged_file_reads.fastq"
+    html_file_name = "${fastq_name}_R1_R2_fastp.html"
+
     """
     #!/usr/bin/env bash
 
+    # this below is just debugging
     echo "this is the file name: ${fastq_name}; this is the forward read (r1): ${fastq[0]}; this is the reverse read(r2): ${fastq[1]}"
 
 
+    ############# Now the PE fastp parameters ################
+    # --in1 or -i : takes the first pair end read
+    # --in2 or -I : takes the second pair end read
+    # --out1 or -o : is the output file name of the fastp first read
+    # --out2 or -O : is the output file name of the fastp second read
+    # --failed_out : specify the file to store reads that cannot pass the filters
+    # --merge or -m : for paired end input, merge each pair of reads into a single read if they are overlapped. the merged reads are written to --merged_out, the unmerged reads will be written to the --out1 and --out2
+    # --detect_adapter_for_pe : to enable auto detection for PE data. The auto detection for adapter is for SE only, so have to turn on for PE
+    # --dedup : enable deduplication to drop the duplicated reads pairs
+    # --dup_calc_accuracy : accuracy level to calculate duplication (1~6) higher level uses more memory
+    # --trim_poly_g : force polyG tail trimming. polyG can happen if there is no signal in the illumina two-color systems
+    # --trim_poly_x : enable polyX trimming in 3' ends. useful because polyX(polyA) can be found in the tails of mRNA seq reads. DONT NEED THIS IN THIS PIPELINE
+    # --qualified_quality_phred : this is the quality value that a base is qualified. default 15 but i choose 20 meaning phred quality >= 20
+    # --unqualified_percent_limit : how many percent of bases are allowed to be unqualified. defualt is 40 meaning 40%
+    # --n_base_limit : if one read's number of N base is > n ase imit  , then this read/pair is discarded default is 5. see fastp documentation
+    # --average_qual :  if one read's average quality score < avg ual , then this read/pair is discarded. Default 0 means no requirement
+    # --correction or -c : enable base correction in overlapped regions (only for PE data), default is disabled. fastp performs overlap analysis for PE data, which try to find an overlap of each pair of reads. When this option is enabled, and if an proper overlap is found, it can correct mismatched base pairs in overlapped regions of paired end reads, if one base is with high quality while the other is with ultra low quality. If a base is corrected, the quality of its paired base will be assigned to it so that they will share the same quality.
+    # --overlap_len_require : the min length to detect oveerlapped region of PE reads. this will affect overlap analysis based PE merge, adapter trimming. default is 30 but i put 20 since the risca_lab snakemake pipeline looks for 20 
+    # --overlap_diff_limit : the maximum number of mismatched bases to detect overlapped region of PE reads. it will affect any trimming or merge parameters. the default is 5 but i think the risc_lab snakemake pipeline allowed only for 1 mismatched bases. the snake make pipeline does only allow for 1 mismatches. But the author said "for now" so I assumed they will look to change it in the future. maybe i can change it back to the default which is 5
+    # --overrepresentation_analysis : enable overrepresented sequence analysis
+    # --overrepresentation_sampling : the number of reads computed for overrepresentation analysis (1~10000). default 20 i used 30
+    # --html or -h : the html format report file name. default is fastp.html but i made my own name using the base name string (key) of the two fastq files that were input in this channel
 
+    ###########################################################
+
+    fastp \
+    --in1 "${fastq[0]}" \
+    --in2 "${fastq[1]}" \
+    --out1 "${out_name_1}" \
+    --out2 "${out_name_2}" \
+    --failed_out "${failed_reads_file}" \
+    --merge \
+    --merged_out "${merged_reads_file}" \
+    --detect_adapter_for_pe \
+    --dedup \
+    --dup_calc_accuracy 5 \
+    --trim_poly_g \
+    --qualified_quality_phred 20 \
+    --unqualified_percent_limit 40 \
+    --n_base_limit 5 \
+    --average_qual 0 \
+    --correction \
+    --overlap_len_require 20 \
+    --overlap_diff_limit 1 \
+    --overrepresentation_analysis \
+    --overrepresentation_sampling 30 \
+    --html "${html_file_name}" 
 
     """
 
@@ -726,7 +780,7 @@ workflow {
 
         pe_fastqs_ch.view()
 
-        random_test_j(pe_fastqs_ch.take(3))
+        fastp_PE(pe_fastqs_ch.take(3))
 
         // now i need to make the parameters for if the paired end fastq files will have the adapter sequence known or not and if the bam file will be blacklist filtered or not
 
