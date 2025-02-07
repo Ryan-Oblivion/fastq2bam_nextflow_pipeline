@@ -535,7 +535,7 @@ process fastp_PE {
     output:
 
     tuple val(fastq_name), path("${out_name_1}"), path("${out_name_2}"), emit: filt_PE_tuple
-    path("${merged_reads_file}"), emit: merged_filt_reads
+    //path("${merged_reads_file}"), emit: merged_filt_reads
     path("${html_file_name}"), emit: html_fastp_out
     path("${failed_reads_file}"), emit: failed_reads_out
 
@@ -607,6 +607,49 @@ process fastp_PE {
     --thread 15
 
     """
+
+}
+
+process fastqc_PE {
+
+    conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
+
+    publishDir './fastqc_pe_files', mode: 'copy', pattern: '*'
+
+    input:
+   
+    tuple val(fastq_name), path(filt_r1), path(filt_r2)
+
+
+    output:
+
+    path ("*.html"), emit: fastqc_htmls
+    path("*.zip"), emit: fastqc_zip_files
+
+
+
+    script:
+
+
+    """
+    #!/usr/bin/env bash
+
+    ########### parameters for fastqc pe reads ###############
+    # no real parameters 
+
+    ###########################################################
+
+    fastqc \
+    "${filt_r1}" 
+
+    fastqc \
+    "${filt_r2}" 
+
+
+
+
+    """
+
 
 }
 
@@ -802,11 +845,19 @@ workflow {
         // checking the channels to see if everything works
         fastp_PE.out.filt_PE_tuple.view()
 
-        //fastp_PE.out.
-        //fastp_PE.out.
+        //fastp_PE.out.html_fastp_out.view()
+        //fastp_PE.out.failed_reads_out.view()
         //fastp_PE.out.
 
-        // now i need to make the parameters for if the paired end fastq files will have the adapter sequence known or not and if the bam file will be blacklist filtered or not
+        pe_filt_tuple_ch = fastp_PE.out.filt_PE_tuple
+
+        fastqc_PE(pe_filt_tuple_ch)
+
+        fastqc_PE.out.fastqc_zip_files.view()
+
+        // then collect them so i can view in one file using multiqc.
+
+        // now i need to make the parameters for  if the bam file will be blacklist filtered or not
 
 
 
