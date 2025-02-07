@@ -518,12 +518,26 @@ process fastp_PE {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
+    publishDir './fastp_pe_results/filt_fastqs', mode: 'copy', pattern: '*_filt_{R1,R2}*'
+
+    publishDir './fastp_pe_results/merged_filt_fastqs', mode: 'copy', pattern: '*_merged*'
+
+    publishDir './fastp_pe_results/failed_qc_reads', mode: 'copy', pattern: '*_failed_filter*'
+
+    publishDir './fastp_pe_results/htmls', mode: 'copy', pattern: '*fastp.html'
+
+
     input:
 
     tuple val(fastq_name), path(fastq)
 
 
     output:
+
+    tuple val(fastq_name), path("${out_name_1}"), path("${out_name_2}"), emit: filt_PE_tuple
+    path("${merged_reads_file}"), emit: merged_filt_reads
+    path("${html_file_name}"), emit: html_fastp_out
+    path("${failed_reads_file}"), emit: failed_reads_out
 
 
     script:
@@ -563,8 +577,12 @@ process fastp_PE {
     # --overrepresentation_analysis : enable overrepresented sequence analysis
     # --overrepresentation_sampling : the number of reads computed for overrepresentation analysis (1~10000). default 20 i used 30
     # --html or -h : the html format report file name. default is fastp.html but i made my own name using the base name string (key) of the two fastq files that were input in this channel
-
+    # --thread or -w : worker thread number default is 2; i used 15
     ###########################################################
+
+    # NOTE: I will remove the merged reads and only keep all the reads that pass the filtering in their corresponding forward and reverse reads
+    #--merge \
+    #--merged_out "\${merged_reads_file}" 
 
     fastp \
     --in1 "${fastq[0]}" \
@@ -572,8 +590,6 @@ process fastp_PE {
     --out1 "${out_name_1}" \
     --out2 "${out_name_2}" \
     --failed_out "${failed_reads_file}" \
-    --merge \
-    --merged_out "${merged_reads_file}" \
     --detect_adapter_for_pe \
     --dedup \
     --dup_calc_accuracy 5 \
@@ -587,7 +603,8 @@ process fastp_PE {
     --overlap_diff_limit 1 \
     --overrepresentation_analysis \
     --overrepresentation_sampling 30 \
-    --html "${html_file_name}" 
+    --html "${html_file_name}" \
+    --thread 15
 
     """
 
@@ -778,9 +795,16 @@ workflow {
 
         pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
 
-        pe_fastqs_ch.view()
+        //pe_fastqs_ch.view()
 
         fastp_PE(pe_fastqs_ch.take(3))
+
+        // checking the channels to see if everything works
+        fastp_PE.out.filt_PE_tuple.view()
+
+        //fastp_PE.out.
+        //fastp_PE.out.
+        //fastp_PE.out.
 
         // now i need to make the parameters for if the paired end fastq files will have the adapter sequence known or not and if the bam file will be blacklist filtered or not
 

@@ -19,6 +19,14 @@ conda activate nextflow_two
 # --BL parameter : to tell the pipeline use the process that filters for black list regions
 # --blacklist_path : give the path to the blacklist bed file you have and include the file in the path. the defualt used is a path to the hg19 v2 black list. so if using a different species or a different human genome use the correct blacklist and not the default.
 
+
+########### for PE data ##############
+# I will not put an option to specify adapters and put your own sequence for the Pair End part of this pipeline
+# The reason being i specified in fastp that we will look adapters for PE and just trim them. read the parameters used in the fastp_PE process
+
+######################################
+
+
 #nextflow run nasa_pipeline.nf -profile 'nasa_pipeline ' \
 #-resume \
 #--SE \
