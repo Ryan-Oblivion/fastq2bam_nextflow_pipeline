@@ -653,6 +653,51 @@ process fastqc_PE {
 
 }
 
+
+process multiqc_PE {
+
+    conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
+
+    publishDir './multiqc_PE_output', mode: 'copy', pattern: '*'
+
+
+    input:
+    path(fastqc_zip_files)
+
+
+    output:
+
+    path("*"), emit: summary_of_PE_filt
+    
+
+
+    script:
+
+
+    """
+    #!/usr/bin/env bash
+
+    ######### parameters for making the html file with all the fastqc output data #############
+
+    
+    # --ai : generate an AI summary of the report
+    # --ai-summary-full : generate a detailed AI summary of the report
+    # --interactive : use only interactive plots
+    # --profile-runtime : add an analysis of how long multiqc takes to run to the report
+    # --ai-provider : choose ai provider defualt sequra . openai or anthropic
+    ############################################################################
+
+    multiqc . \
+    --ai-summary-full \
+    --ai-provider openai \
+    --interactive \
+    --profile-runtime \
+    --title "Pair end QC"
+
+
+    """
+}
+
 workflow {
 
     // this is the end seq alignment steps first
@@ -843,7 +888,7 @@ workflow {
         fastp_PE(pe_fastqs_ch.take(3))
 
         // checking the channels to see if everything works
-        fastp_PE.out.filt_PE_tuple.view()
+        //fastp_PE.out.filt_PE_tuple.view()
 
         //fastp_PE.out.html_fastp_out.view()
         //fastp_PE.out.failed_reads_out.view()
@@ -853,9 +898,15 @@ workflow {
 
         fastqc_PE(pe_filt_tuple_ch)
 
-        fastqc_PE.out.fastqc_zip_files.view()
+        //fastqc_PE.out.fastqc_zip_files.view()
+
 
         // then collect them so i can view in one file using multiqc.
+        collection_fastqc_ch =fastqc_PE.out.fastqc_zip_files.collect()
+
+        multiqc_PE(collection_fastqc_ch)
+
+        multiqc_PE.out.summary_of_PE_filt.view()
 
         // now i need to make the parameters for  if the bam file will be blacklist filtered or not
 
