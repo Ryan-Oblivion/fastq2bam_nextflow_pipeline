@@ -37,5 +37,12 @@ conda activate nextflow_two
 nextflow run nasa_pipeline.nf -profile 'nasa_pipeline ' \
 -resume \
 --PE \
---BL
+--BL \
+-preview \
+-with-dag fastq2bam_nf_pipeline_flowchart.png
  
+
+ # NOTE: If you want to make your own nextflow diagram to see how the pipeline works run this command
+
+# -with-dag fastq2bam_nf_pipeline_flowchart.png, it seems like this alone overwrites the resume option
+# add -preview to render it without having to run the pipeline 

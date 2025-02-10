@@ -419,7 +419,7 @@ process deeptools_make_bed {
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/deeptools_rj'
 
     // this section is just a simple if else statement controlling the directories that are created and when the files end up
-    
+    // will copy and paste in other processes that need it.
     if (params.PE) {
 
         if (params.BL) {
@@ -492,7 +492,17 @@ process bedtools_filt_blacklist {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/bedtools_rj'
 
-    publishDir './blacklist_filt_bam', mode: 'copy', pattern: '*.bam'
+    //publishDir './blacklist_filt_bam', mode: 'copy', pattern: '*.bam'
+
+    if (params.PE) {
+
+        publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*.bam'
+    
+    }
+    else {
+
+        publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*.bam'    
+    }
 
     input:
 
@@ -500,7 +510,7 @@ process bedtools_filt_blacklist {
     path(blacklist_file)
 
     output:
-    tuple path("${out_bl_filtered_bam}"), emit: bl_filtered_bams
+    path("${out_bl_filtered_bam}"), emit: bl_filtered_bams
 
 
     script:
@@ -528,7 +538,16 @@ process bedtools_filt_blacklist {
 process samtools_bl_index {
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj'
 
-    publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
+    //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
+    if (params.PE) {
+
+        publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+    
+    }
+    else {
+
+        publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'    
+    }
 
     input:
     path(bl_filt_bam)
