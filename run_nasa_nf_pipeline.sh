@@ -36,4 +36,6 @@ conda activate nextflow_two
 
 nextflow run nasa_pipeline.nf -profile 'nasa_pipeline ' \
 -resume \
---PE
+--PE \
+--BL
+ 

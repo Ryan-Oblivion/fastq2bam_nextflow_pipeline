@@ -1,0 +1,321 @@
+N E X T F L O W  ~  version 21.10.6
+Launching `nasa_pipeline.nf` [agitated_gates] - revision: 1b72e2dd78
+WARN: Access to undefined parameter `SE` -- Initialise it to a default value eg. `params.SE = some_value`
+[-        ] process > fastp_PE         -
+[-        ] process > fastqc_PE        -
+[-        ] process > multiqc_PE       -
+[-        ] process > bwa_index_genome -
+[-        ] process > bwa_PE_aln       -
+[-        ] process > samtools_sort    -
+
+[-        ] process > fastp_PE                -
+[-        ] process > fastqc_PE               -
+[-        ] process > multiqc_PE              -
+[-        ] process > bwa_index_genome        -
+[-        ] process > bwa_PE_aln              -
+[-        ] process > samtools_sort           -
+[-        ] process > bedtools_filt_blacklist -
+[-        ] process > samtools_bl_index       -
+[-        ] process > deeptools_make_bed      -
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+[3b/33d773] process > fastp_PE (1)            [100%] 2 of 2, cached: 2
+[01/59db9a] process > fastqc_PE (1)           [100%] 1 of 1, cached: 1
+[-        ] process > multiqc_PE              -
+[4d/3c26bb] process > bwa_index_genome        [100%] 1 of 1, cached: 1
+[d9/34ddc4] process > bwa_PE_aln (1)          [100%] 1 of 1, cached: 1
+[-        ] process > samtools_sort           -
+[-        ] process > bedtools_filt_blacklist -
+[-        ] process > samtools_bl_index       -
+[-        ] process > deeptools_make_bed      -
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+[60/128dc5] process > fastp_PE (3)            [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)           [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE              [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome        [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)          [100%] 3 of 3, cached: 3 ✔
+[dd/e29ba3] process > samtools_sort (2)       [100%] 2 of 2, cached: 2
+[-        ] process > bedtools_filt_blacklist [  0%] 0 of 2
+[-        ] process > samtools_bl_index       -
+[-        ] process > deeptools_make_bed      -
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [  0%] 0 of 3
+[-        ] process > samtools_bl_index           -
+[-        ] process > deeptools_make_bed          -
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [  0%] 0 of 3
+[-        ] process > samtools_bl_index           -
+[-        ] process > deeptools_make_bed          -
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [  0%] 0 of 3
+[-        ] process > samtools_bl_index           -
+[-        ] process > deeptools_make_bed          -
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[66/24a489] process > bedtools_filt_blacklist (2) [ 33%] 1 of 3
+[-        ] process > samtools_bl_index           [  0%] 0 of 1
+[-        ] process > deeptools_make_bed          -
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/24a489fe6e2eb20be3ad66c711f5f6/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+executor >  slurm (4)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[66/24a489] process > bedtools_filt_blacklist (2) [ 33%] 1 of 3
+[81/31c08b] process > samtools_bl_index (1)       [  0%] 0 of 1
+[-        ] process > deeptools_make_bed          -
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/24a489fe6e2eb20be3ad66c711f5f6/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+executor >  slurm (5)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[66/24a489] process > bedtools_filt_blacklist (2) [ 33%] 1 of 3
+[81/31c08b] process > samtools_bl_index (1)       [100%] 1 of 1
+[0d/70f831] process > deeptools_make_bed (1)      [  0%] 0 of 1
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0f/3304960cc069108a1fea8a082f3b6f/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dd/e29ba36787ac4c66165ae1a63cbc90/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/4cdf7e71c5c2855592c5c6f48970e7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted.bam.bai]
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/24a489fe6e2eb20be3ad66c711f5f6/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist`
+
+executor >  slurm (5)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[66/24a489] process > bedtools_filt_blacklist (2) [ 33%] 1 of 3
+[81/31c08b] process > samtools_bl_index (1)       [100%] 1 of 1
+[0d/70f831] process > deeptools_make_bed (1)      [  0%] 0 of 1
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/66/24a489fe6e2eb20be3ad66c711f5f6/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+
+
+
+
+
+executor >  slurm (6)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[73/2f4616] process > bedtools_filt_blacklist (1) [ 66%] 2 of 3
+[00/c16ea5] process > samtools_bl_index (2)       [ 50%] 1 of 2
+[0d/70f831] process > deeptools_make_bed (1)      [  0%] 0 of 1
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/73/2f4616e6271c9671fd2d16899d088e/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+
+
+
+
+
+executor >  slurm (6)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[73/2f4616] process > bedtools_filt_blacklist (1) [ 66%] 2 of 3
+[00/c16ea5] process > samtools_bl_index (2)       [ 50%] 1 of 2
+[0d/70f831] process > deeptools_make_bed (1)      [  0%] 0 of 1
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/73/2f4616e6271c9671fd2d16899d088e/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+
+
+executor >  slurm (7)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[73/2f4616] process > bedtools_filt_blacklist (1) [ 66%] 2 of 3
+[00/c16ea5] process > samtools_bl_index (2)       [100%] 2 of 2
+[dc/a23db6] process > deeptools_make_bed (2)      [  0%] 0 of 2
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/73/2f4616e6271c9671fd2d16899d088e/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+
+executor >  slurm (7)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[73/2f4616] process > bedtools_filt_blacklist (1) [ 66%] 2 of 3
+[00/c16ea5] process > samtools_bl_index (2)       [100%] 2 of 2
+[dc/a23db6] process > deeptools_make_bed (2)      [  0%] 0 of 2
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/73/2f4616e6271c9671fd2d16899d088e/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+
+executor >  slurm (8)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [100%] 3 of 3 ✔
+[65/453532] process > samtools_bl_index (3)       [ 66%] 2 of 3
+[dc/a23db6] process > deeptools_make_bed (2)      [  0%] 0 of 2
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/73/2f4616e6271c9671fd2d16899d088e/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/1b/688a0120ef44145b1b4e363f7fa0b7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+
+executor >  slurm (8)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [100%] 3 of 3 ✔
+[65/453532] process > samtools_bl_index (3)       [ 66%] 2 of 3
+[dc/a23db6] process > deeptools_make_bed (2)      [  0%] 0 of 2
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/73/2f4616e6271c9671fd2d16899d088e/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/1b/688a0120ef44145b1b4e363f7fa0b7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+
+executor >  slurm (8)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [100%] 3 of 3 ✔
+[65/453532] process > samtools_bl_index (3)       [ 66%] 2 of 3
+[dc/a23db6] process > deeptools_make_bed (2)      [  0%] 0 of 2
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/1b/688a0120ef44145b1b4e363f7fa0b7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0d/70f8310e4298500586bd20d628d00a/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt_normalized_cpm.bed
+
+
+executor >  slurm (9)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [100%] 3 of 3 ✔
+[65/453532] process > samtools_bl_index (3)       [100%] 3 of 3 ✔
+[e2/e3d656] process > deeptools_make_bed (3)      [ 33%] 1 of 3
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/1b/688a0120ef44145b1b4e363f7fa0b7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0d/70f8310e4298500586bd20d628d00a/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt_normalized_cpm.bed
+
+
+executor >  slurm (9)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [100%] 3 of 3 ✔
+[65/453532] process > samtools_bl_index (3)       [100%] 3 of 3 ✔
+[e2/e3d656] process > deeptools_make_bed (3)      [ 33%] 1 of 3
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/1b/688a0120ef44145b1b4e363f7fa0b7/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt.bam
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/0d/70f8310e4298500586bd20d628d00a/B_HB1_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt_normalized_cpm.bed
+
+executor >  slurm (9)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [100%] 3 of 3 ✔
+[65/453532] process > samtools_bl_index (3)       [100%] 3 of 3 ✔
+[dc/a23db6] process > deeptools_make_bed (2)      [ 66%] 2 of 3
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/dc/a23db6234302b7527935b83c6e340d/K_HB2_0GyP_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt_normalized_cpm.bed
+
+
+
+executor >  slurm (9)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [100%] 3 of 3 ✔
+[65/453532] process > samtools_bl_index (3)       [100%] 3 of 3 ✔
+[e2/e3d656] process > deeptools_make_bed (3)      [100%] 3 of 3 ✔
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/e2/e3d656d26e3a6904fa49f3ba7950f8/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt_normalized_cpm.bed
+
+
+
+executor >  slurm (9)
+[60/128dc5] process > fastp_PE (3)                [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3)               [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE                  [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome            [100%] 1 of 1, cached: 1 ✔
+[51/5d3061] process > bwa_PE_aln (3)              [100%] 3 of 3, cached: 3 ✔
+[66/4cdf7e] process > samtools_sort (3)           [100%] 3 of 3, cached: 3 ✔
+[1b/688a01] process > bedtools_filt_blacklist (3) [100%] 3 of 3 ✔
+[65/453532] process > samtools_bl_index (3)       [100%] 3 of 3 ✔
+[e2/e3d656] process > deeptools_make_bed (3)      [100%] 3 of 3 ✔
+/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/e2/e3d656d26e3a6904fa49f3ba7950f8/I_HB2_PLC_T1_S00_filt_r1_r2_bam_filt_sorted_BL_filt_normalized_cpm.bed
+
+Completed at: 10-Feb-2025 15:26:08
+Duration    : 4m 8s
+CPU hours   : 12.5 (88.8% cached)
+Succeeded   : 9
+Cached      : 14
+
+

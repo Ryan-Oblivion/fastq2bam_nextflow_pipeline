@@ -357,7 +357,8 @@ process samtools_sort {
     script:
 
     // i will start using baseName inside the process since its easier to keep track of different names an uses less inputs into a process
-    out_bam = "${sam_files.baseName}_sorted.bam"
+    out_bam_filt = "${sam_files.baseName}_bam_filt.bam"
+    out_bam_sort = "${sam_files.baseName}_bam_filt_sorted.bam"
 
 
 
@@ -365,6 +366,11 @@ process samtools_sort {
     #!/usr/bin/env bash
 
     ################# samtools parameters used ################
+    # for samtools view
+    # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
+    # --bam or -b : output in the bam format
+    # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
+
     # for samtools sort
     # -o : takes a file. it writes the final sorted output to file rather than standard output
     # -O : write the final output as sam, bam, or cram
@@ -376,10 +382,20 @@ process samtools_sort {
 
     ###########################################################
 
+    # I should add a samtools filtering. looking to only get mapq scores higher than 30
+
+    samtools view \
+    -q 30 \
+    -b \
+    "${sam_files}" \
+    > "${out_bam_filt}" 
+     
+    
+
     samtools sort \
-    -o "${out_bam}" \
+    -o "${out_bam_sort}" \
     -O bam \
-    "${sam_files}"
+    "${out_bam_filt}"
 
     # so i will use the out_bam for input to samtools index since it has to be coordinate sorted
     # I will not make an out file name since I hope samtools index will just add the prefix
@@ -387,7 +403,7 @@ process samtools_sort {
 
     samtools index \
     -b \
-    "${out_bam}" 
+    "${out_bam_sort}" 
 
 
 
@@ -397,12 +413,37 @@ process samtools_sort {
     """
 }
 
-process deeptools_make_bed_SE {
+process deeptools_make_bed {
     // this conda env yml file didnt work. have to use the actual env
     //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/deeptools_rj_env.yml'
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/deeptools_rj'
 
-    publishDir './bed_graphs_deeptools_SE/', mode: 'copy', pattern: '*'
+    // this section is just a simple if else statement controlling the directories that are created and when the files end up
+    
+    if (params.PE) {
+
+        if (params.BL) {
+
+            publishDir './results_PE/bl_filt_bed/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
+
+        }
+        else {
+            publishDir './results_PE/no_bl_filt/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
+        }
+    
+    }
+    else {
+
+        if (params.BL) {
+
+            publishDir './results_SE/bl_filt_bed/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
+
+        }
+        else {
+            publishDir './results_SE/no_bl_filt/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
+        }
+    }
+
 
     input:
 
@@ -447,7 +488,7 @@ process deeptools_make_bed_SE {
     """
 }
 
-process bedtools_filt_blacklist_SE {
+process bedtools_filt_blacklist {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/bedtools_rj'
 
@@ -704,7 +745,7 @@ process bwa_PE_aln {
 
     publishDir './pe_bwa_files/pe_sam_files', mode: 'copy', pattern: '*.sam'
     publishDir './pe_bwa_files/pe_sai_index_files', mode: 'copy', pattern: '*.sai'
-    cache false
+    //cache false 
 
 
     input:
@@ -777,7 +818,9 @@ workflow {
     // keeping the human genome in a value channel so i can have other processes run more than once.
     genome_ch = Channel.value(params.genome)
 
-
+    params.blacklist_path = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/blacklist/hg19-blacklist.v2.bed')
+                
+    blacklist_ch = Channel.value(params.blacklist_path)
 
     // i want to add an if then logic to the pipeline so i know which type of reads are comming in paired end or single end
 
@@ -794,6 +837,9 @@ workflow {
     if ( params.SE ) {
 
         
+            
+
+            
 
             // lets get the channel for the single end reads first
             // only use the single end read 1 data from the end seq which are already stored here: /rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs
@@ -910,13 +956,13 @@ workflow {
 
                 // using bedtools to filter black list but first giving the user an option to put the correct black list for an organism
                 // by defualt it will use the hg19 v2 blacklist, but if you used a different organism or human genome use the appropriate blacklist
-                params.blacklist_path = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/blacklist/hg19-blacklist.v2.bed')
+                //params.blacklist_path = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/blacklist/hg19-blacklist.v2.bed')
                 
-                blacklist_ch = Channel.value(params.blacklist_path)
+                //blacklist_ch = Channel.value(params.blacklist_path)
 
-                bedtools_filt_blacklist_SE(both_bam_index_ch, blacklist_ch)
+                bedtools_filt_blacklist(both_bam_index_ch, blacklist_ch)
 
-                bl_filt_bams_ch = bedtools_filt_blacklist_SE.out.bl_filtered_bams
+                bl_filt_bams_ch = bedtools_filt_blacklist.out.bl_filtered_bams
                 // i will need to index the black list filtered bam again so i have to create a different samtools process for this
                 samtools_bl_index(bl_filt_bams_ch)
 
@@ -924,18 +970,18 @@ workflow {
 
                 // then i need to pass the indexed_bl_bam and the bam to the deeptools process
 
-                deeptools_make_bed_SE(bl_filt_bam_tuple_ch)
-                bed_files_norm_ch = deeptools_make_bed_SE.out.bed_files_normalized
+                deeptools_make_bed(bl_filt_bam_tuple_ch)
+                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
             }
 
             else {
 
                 // Now i want to pass the tuple that has the bam and its corresponding index file into a process that will create a bigwig file for visulization, created from the bam file. This will show read coverage in the genome without looking for significant areas
-                deeptools_make_bed_SE(both_bam_index_ch)
+                deeptools_make_bed(both_bam_index_ch)
 
-                //deeptools_make_bed_SE.out.bed_files_normalized.view()
-                bed_files_norm_ch = deeptools_make_bed_SE.out.bed_files_normalized
+                //deeptools_make_bed.out.bed_files_normalized.view()
+                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
             }
     
 
@@ -985,16 +1031,72 @@ workflow {
 
         // now to use bwa aln and bwa sampe to align the filtered pair end reads to the reference genome and then to create the sam file respectively
 
-        pe_filt_tuple_ch.view()
-        genome_ch.view()
-        genome_index_ch.view()
+        //pe_filt_tuple_ch.view()
+        //genome_ch.view()
+        //genome_index_ch.view()
 
         bwa_PE_aln(pe_filt_tuple_ch, genome_ch, genome_index_ch)
 
         // now check to see if the output channels are good
         //bwa_PE_aln.out.pe_sam_files.view()
+        
+        
         // now i need to make the parameters for  if the bam file will be blacklist filtered or not
+        
+        // using this channel for both if Blacklist or not
+        sam_files_pe_ch = bwa_PE_aln.out.pe_sam_files
 
+        if (params.BL) {
+
+            
+            // i have to make a bam file to then use bedtools intersect to get the blacklist
+            // using the same samtools sort process found in the SE part of the pipeline
+            samtools_sort(sam_files_pe_ch)
+
+            samtools_sort.out.bam_index_tuple.view()
+
+            bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
+
+            // this will give a blacklist filtered bam but i need to index it again
+            bedtools_filt_blacklist(bam_index_tuple_ch, blacklist_ch)
+            bedtools_filt_blacklist.out.bl_filtered_bams.view()
+
+            bl_filt_bams_ch = bedtools_filt_blacklist.out.bl_filtered_bams
+            // so using the process to only index which means it will take the blacklist bam file
+
+            samtools_bl_index(bl_filt_bams_ch)
+
+            bl_filt_bam_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
+
+            // so this would give a bam that is bl filtered and has an index
+            
+            // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
+
+            deeptools_make_bed(bl_filt_bam_tuple_ch)
+
+            deeptools_make_bed.out.bed_files_normalized.view()
+
+            bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+
+
+        }
+        else {
+            samtools_sort(sam_files_pe_ch)
+
+            samtools_sort.out.bam_index_tuple.view()
+
+            bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
+
+            // just using the original sorted and indexed bam
+
+            deeptools_make_bed(bam_index_tuple_ch)
+
+            deeptools_make_bed.out.bed_files_normalized.view()
+
+            bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+
+
+        }
 
 
 
