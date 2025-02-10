@@ -15,7 +15,7 @@ conda activate nextflow_two
 # --SE parameter for pair end reads
 # when useing SE do --single_end_reads and give the path to your single end reads with a glob pattern if you have other reads in that directory you dont want
 # if you have an adapter sequence use --ada_seq, then specify the sequence with --adapter_seq_str which will take the string sequence
-
+# use --genome and give the path including the file of your genome of choice
 # --BL parameter : to tell the pipeline use the process that filters for black list regions
 # --blacklist_path : give the path to the blacklist bed file you have and include the file in the path. the defualt used is a path to the hg19 v2 black list. so if using a different species or a different human genome use the correct blacklist and not the default.
 

@@ -698,17 +698,84 @@ process multiqc_PE {
     """
 }
 
+process bwa_PE_aln {
+
+    conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
+
+    publishDir './pe_bwa_files/pe_sam_files', mode: 'copy', pattern: '*.sam'
+    publishDir './pe_bwa_files/pe_sai_index_files', mode: 'copy', pattern: '*.sai'
+    cache false
+
+
+    input:
+    tuple val(filt_fastq_name), path(fastq_r1), path(fastq_r2)
+    path(genome)
+    path(genome_index)
+
+
+    output:
+
+    path("*.sam"), emit: pe_sam_files
+    path("*.sai"), emit: pe_sai_files
+
+
+
+    script:
+
+    sai_out_file_r1 = "${filt_fastq_name}_filt_r1.sai"
+    sai_out_file_r2 = "${filt_fastq_name}_filt_r2.sai"
+
+    out_sam_file = "${filt_fastq_name}_filt_r1_r2.sam"
+
+
+    """
+    #!/usr/bin/env bash
+
+    ######## bwa aln parameters / bwa sampe params #########
+    # -t : allows for the amout of threads you want this process to use
+
+    #
+
+
+
+    #########################################################
+
+
+    bwa aln \
+    -t 20 \
+    "${genome}" \
+    "${fastq_r1}" \
+    > "${sai_out_file_r1}"
+
+    bwa aln \
+    -t 20 \
+    "${genome}" \
+    "${fastq_r2}" \
+    > "${sai_out_file_r2}"
+
+
+    bwa sampe \
+    "${genome}" \
+    "${sai_out_file_r1}" \
+    "${sai_out_file_r2}" \
+    "${fastq_r1}" \
+    "${fastq_r2}" \
+    > "${out_sam_file}"
+
+    """
+}
+
 workflow {
 
     // this is the end seq alignment steps first
 
 
-    // i will use a path already in the hpc as the defualt human genome but the user can change the genome by using -human_genome parameter and putting the path to a new genome in the command line when calling nextflow run
-    params.human_genome = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/genome/Sequence/Bowtie2Index/genome.fa')
+    // i will use a path already in the hpc as the defualt human genome but the user can change the genome by using -genome parameter and putting the path to a new genome in the command line when calling nextflow run
+    params.genome = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/genome/Sequence/Bowtie2Index/genome.fa')
 
     // putting the human genome in a channel
     // keeping the human genome in a value channel so i can have other processes run more than once.
-    human_genome_ch = Channel.value(params.human_genome)
+    genome_ch = Channel.value(params.genome)
 
 
 
@@ -719,7 +786,7 @@ workflow {
 
       //   fastp_PE()
          
-         //align_PE_reads(human_genome_ch)
+         //align_PE_reads(genome_ch)
     
     
     
@@ -807,7 +874,7 @@ workflow {
             multiqc_SE(fastqc_zips.collect())
 
             // first have a seprate process that indexes the reference genome using bwa or bwa mem so this part doesnt have to be done again and will be cached
-            bwa_index_genome(human_genome_ch)
+            bwa_index_genome(genome_ch)
 
             // collecting the genome index files from the last process 
             // not sure if i should keep track of the order the files are in first
@@ -817,7 +884,7 @@ workflow {
 
             // Now I need to pass the human genome file to the process to index the genome file. Also I will add the filtered fastq files from fastp into this process that will be aligned to the genome. 
             // each run of this only takes 20-30 min to run but since the hpc only is allowing 2-3 to run at one time it takes 3 hours
-            bwa_align_SE(human_genome_ch, genome_index_files_ch, fastq_filts, fastq_filts_name )
+            bwa_align_SE(genome_ch, genome_index_files_ch, fastq_filts, fastq_filts_name )
 
             //bwa_align_SE.out.sam_se_files.view()
 
@@ -906,9 +973,28 @@ workflow {
 
         multiqc_PE(collection_fastqc_ch)
 
-        multiqc_PE.out.summary_of_PE_filt.view()
+        //multiqc_PE.out.summary_of_PE_filt.view()
 
+        // first use the process to index the reference genome since the process exists already for the se
+
+        bwa_index_genome(genome_ch)
+
+        //bwa_index_genome.out.genome_index_files.view()
+
+        genome_index_ch = bwa_index_genome.out.genome_index_files
+
+        // now to use bwa aln and bwa sampe to align the filtered pair end reads to the reference genome and then to create the sam file respectively
+
+        pe_filt_tuple_ch.view()
+        genome_ch.view()
+        genome_index_ch.view()
+
+        bwa_PE_aln(pe_filt_tuple_ch, genome_ch, genome_index_ch)
+
+        // now check to see if the output channels are good
+        //bwa_PE_aln.out.pe_sam_files.view()
         // now i need to make the parameters for  if the bam file will be blacklist filtered or not
+
 
 
 
