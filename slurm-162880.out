@@ -1,0 +1,55 @@
+N E X T F L O W  ~  version 21.10.6
+Launching `nasa_pipeline.nf` [suspicious_stone] - revision: b0a327e04c
+WARN: Access to undefined parameter `SE` -- Initialise it to a default value eg. `params.SE = some_value`
+[-        ] process > fastp_PE  -
+[-        ] process > fastqc_PE -
+
+[60/128dc5] process > fastp_PE (3) [100%] 3 of 3, cached: 3 ✔
+[-        ] process > fastqc_PE    -
+[B_HB1_0GyP_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/3b/33d773c5dbf61342ff8a1c379113ba/B_HB1_0GyP_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/3b/33d773c5dbf61342ff8a1c379113ba/B_HB1_0GyP_T1_S00_filt_R2_0.fastq]
+[K_HB2_0GyP_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/ac/292e9eab770136febd7e00b85b7185/K_HB2_0GyP_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/ac/292e9eab770136febd7e00b85b7185/K_HB2_0GyP_T1_S00_filt_R2_0.fastq]
+[I_HB2_PLC_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/60/128dc5a15e65e83c95d2528dbbaf32/I_HB2_PLC_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/60/128dc5a15e65e83c95d2528dbbaf32/I_HB2_PLC_T1_S00_filt_R2_0.fastq]
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)  [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3) [  0%] 0 of 3
+[B_HB1_0GyP_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/3b/33d773c5dbf61342ff8a1c379113ba/B_HB1_0GyP_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/3b/33d773c5dbf61342ff8a1c379113ba/B_HB1_0GyP_T1_S00_filt_R2_0.fastq]
+[K_HB2_0GyP_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/ac/292e9eab770136febd7e00b85b7185/K_HB2_0GyP_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/ac/292e9eab770136febd7e00b85b7185/K_HB2_0GyP_T1_S00_filt_R2_0.fastq]
+[I_HB2_PLC_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/60/128dc5a15e65e83c95d2528dbbaf32/I_HB2_PLC_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/60/128dc5a15e65e83c95d2528dbbaf32/I_HB2_PLC_T1_S00_filt_R2_0.fastq]
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)  [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3) [  0%] 0 of 3
+[B_HB1_0GyP_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/3b/33d773c5dbf61342ff8a1c379113ba/B_HB1_0GyP_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/3b/33d773c5dbf61342ff8a1c379113ba/B_HB1_0GyP_T1_S00_filt_R2_0.fastq]
+[K_HB2_0GyP_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/ac/292e9eab770136febd7e00b85b7185/K_HB2_0GyP_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/ac/292e9eab770136febd7e00b85b7185/K_HB2_0GyP_T1_S00_filt_R2_0.fastq]
+[I_HB2_PLC_T1_S00, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/60/128dc5a15e65e83c95d2528dbbaf32/I_HB2_PLC_T1_S00_filt_R1_0.fastq, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/60/128dc5a15e65e83c95d2528dbbaf32/I_HB2_PLC_T1_S00_filt_R2_0.fastq]
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)  [100%] 3 of 3, cached: 3 ✔
+[89/bae5a7] process > fastqc_PE (1) [ 33%] 1 of 3
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/89/bae5a7e2227c2afefa10d117a38515/B_HB1_0GyP_T1_S00_filt_R1_0_fastqc.zip, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/89/bae5a7e2227c2afefa10d117a38515/B_HB1_0GyP_T1_S00_filt_R2_0_fastqc.zip]
+
+
+
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)  [100%] 3 of 3, cached: 3 ✔
+[01/59db9a] process > fastqc_PE (2) [ 66%] 2 of 3
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/89/bae5a7e2227c2afefa10d117a38515/B_HB1_0GyP_T1_S00_filt_R1_0_fastqc.zip, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/89/bae5a7e2227c2afefa10d117a38515/B_HB1_0GyP_T1_S00_filt_R2_0_fastqc.zip]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/01/59db9a14e45acb8436a46917029393/K_HB2_0GyP_T1_S00_filt_R1_0_fastqc.zip, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/01/59db9a14e45acb8436a46917029393/K_HB2_0GyP_T1_S00_filt_R2_0_fastqc.zip]
+
+
+
+executor >  slurm (3)
+[60/128dc5] process > fastp_PE (3)  [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3) [100%] 3 of 3 ✔
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/89/bae5a7e2227c2afefa10d117a38515/B_HB1_0GyP_T1_S00_filt_R1_0_fastqc.zip, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/89/bae5a7e2227c2afefa10d117a38515/B_HB1_0GyP_T1_S00_filt_R2_0_fastqc.zip]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/01/59db9a14e45acb8436a46917029393/K_HB2_0GyP_T1_S00_filt_R1_0_fastqc.zip, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/01/59db9a14e45acb8436a46917029393/K_HB2_0GyP_T1_S00_filt_R2_0_fastqc.zip]
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/bb/d9790413ee17795d4fcc3f2e658ba1/I_HB2_PLC_T1_S00_filt_R1_0_fastqc.zip, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/bb/d9790413ee17795d4fcc3f2e658ba1/I_HB2_PLC_T1_S00_filt_R2_0_fastqc.zip]
+Completed at: 07-Feb-2025 15:21:55
+Duration    : 1m 32s
+CPU hours   : 0.6 (89.1% cached)
+Succeeded   : 3
+Cached      : 3
+
+

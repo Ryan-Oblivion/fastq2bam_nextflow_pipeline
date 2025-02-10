@@ -1,0 +1,27 @@
+N E X T F L O W  ~  version 21.10.6
+Launching `nasa_pipeline.nf` [furious_shockley] - revision: c7f95a6b47
+WARN: Access to undefined parameter `SE` -- Initialise it to a default value eg. `params.SE = some_value`
+[-        ] process > fastp_PE   -
+[-        ] process > fastqc_PE  -
+[-        ] process > multiqc_PE -
+
+[3b/33d773] process > fastp_PE (2) [100%] 2 of 2, cached: 2
+[-        ] process > fastqc_PE    -
+[-        ] process > multiqc_PE   -
+
+executor >  slurm (1)
+[60/128dc5] process > fastp_PE (3)  [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3) [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE    [  0%] 0 of 1
+
+executor >  slurm (1)
+[60/128dc5] process > fastp_PE (3)  [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3) [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE    [  0%] 0 of 1
+
+executor >  slurm (1)
+[60/128dc5] process > fastp_PE (3)  [100%] 3 of 3, cached: 3 ✔
+[bb/d97904] process > fastqc_PE (3) [100%] 3 of 3, cached: 3 ✔
+[4f/db741a] process > multiqc_PE    [100%] 1 of 1 ✔
+[/lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/4f/db741ad658659271ff2a92b451c8b7/Pair-end-QC_multiqc_report.html, /lustre/fs4/risc_lab/scratch/rjohnson/pipelines/hera_pipeline/work/4f/db741ad658659271ff2a92b451c8b7/Pair-end-QC_multiqc_report_data]
+

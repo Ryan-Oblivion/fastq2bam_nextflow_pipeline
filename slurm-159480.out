@@ -1,0 +1,151 @@
+N E X T F L O W  ~  version 21.10.6
+Launching `nasa_pipeline.nf` [nostalgic_coulomb] - revision: bf6f16af62
+[-        ] process > fastp_SE_adapter_known -
+[-        ] process > fastqc_SE              -
+
+[-        ] process > fastp_SE_adapter_known     -
+[-        ] process > fastqc_SE                  -
+[-        ] process > multiqc_SE                 -
+[-        ] process > bwa_index_genome           -
+[-        ] process > bwa_align_SE               -
+[-        ] process > samtools_sort              -
+[-        ] process > bedtools_filt_blacklist_SE -
+[-        ] process > samtools_bl_index          -
+[-        ] process > deeptools_make_bed_SE      -
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+[01/6104c6] process > fastp_SE_adapter_known (2) [100%] 2 of 2, cached: 2
+[d7/36e5d8] process > fastqc_SE (1)              [100%] 1 of 1, cached: 1
+[-        ] process > multiqc_SE                 -
+[4d/3c26bb] process > bwa_index_genome           [100%] 1 of 1, cached: 1
+[-        ] process > bwa_align_SE               -
+[-        ] process > samtools_sort              -
+[-        ] process > bedtools_filt_blacklist_SE -
+[-        ] process > samtools_bl_index          -
+[-        ] process > deeptools_make_bed_SE      -
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[35/4ff534] process > samtools_sort (1)              [100%] 1 of 1, cached: 1
+[94/48e251] process > bedtools_filt_blacklist_SE (1) [100%] 1 of 1, cached: 1
+[-        ] process > samtools_bl_index              -
+[-        ] process > deeptools_make_bed_SE          -
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+executor >  slurm (3)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[e7/4fed8e] process > samtools_bl_index (3)          [  0%] 0 of 3
+[-        ] process > deeptools_make_bed_SE          -
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+executor >  slurm (4)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[d0/cdfb33] process > samtools_bl_index (1)          [ 33%] 1 of 3
+[97/e83026] process > deeptools_make_bed_SE (1)      [  0%] 0 of 1
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+executor >  slurm (5)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[35/6bf1bc] process > samtools_bl_index (2)          [ 66%] 2 of 3
+[ec/855132] process > deeptools_make_bed_SE (2)      [  0%] 0 of 2
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+executor >  slurm (5)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[35/6bf1bc] process > samtools_bl_index (2)          [ 66%] 2 of 3
+[ec/855132] process > deeptools_make_bed_SE (2)      [  0%] 0 of 2
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+executor >  slurm (6)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[e7/4fed8e] process > samtools_bl_index (3)          [100%] 3 of 3 ✔
+[ea/23e78e] process > deeptools_make_bed_SE (3)      [  0%] 0 of 3
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+executor >  slurm (6)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[e7/4fed8e] process > samtools_bl_index (3)          [100%] 3 of 3 ✔
+[ea/23e78e] process > deeptools_make_bed_SE (3)      [  0%] 0 of 3
+WARN: Output `set` must define at least two component -- Check process `bedtools_filt_blacklist_SE`
+
+executor >  slurm (6)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[e7/4fed8e] process > samtools_bl_index (3)          [100%] 3 of 3 ✔
+[ec/855132] process > deeptools_make_bed_SE (2)      [ 66%] 2 of 3
+
+
+executor >  slurm (6)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[e7/4fed8e] process > samtools_bl_index (3)          [100%] 3 of 3 ✔
+[ea/23e78e] process > deeptools_make_bed_SE (3)      [100%] 3 of 3 ✔
+
+
+executor >  slurm (6)
+[c0/2d5927] process > fastp_SE_adapter_known (3)     [100%] 3 of 3, cached: 3 ✔
+[21/571e06] process > fastqc_SE (3)                  [100%] 3 of 3, cached: 3 ✔
+[5f/99c4f3] process > multiqc_SE                     [100%] 1 of 1, cached: 1 ✔
+[4d/3c26bb] process > bwa_index_genome               [100%] 1 of 1, cached: 1 ✔
+[70/2ee594] process > bwa_align_SE (3)               [100%] 3 of 3, cached: 3 ✔
+[43/6f0c44] process > samtools_sort (3)              [100%] 3 of 3, cached: 3 ✔
+[73/e39de9] process > bedtools_filt_blacklist_SE (3) [100%] 3 of 3, cached: 3 ✔
+[e7/4fed8e] process > samtools_bl_index (3)          [100%] 3 of 3 ✔
+[ea/23e78e] process > deeptools_make_bed_SE (3)      [100%] 3 of 3 ✔
+Completed at: 06-Feb-2025 13:23:12
+Duration    : 4m 18s
+CPU hours   : 20.0 (94.6% cached)
+Succeeded   : 6
+Cached      : 17
+
+
