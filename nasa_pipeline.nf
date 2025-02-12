@@ -337,10 +337,28 @@ process samtools_sort {
     // it doesnt work
     //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools_rj_env.yml'
 
-    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj'
+    //conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj' // this was samtools version 1.3 which doesnt have samtools fixmate option -m
 
-    publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-    publishDir './indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
+    conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools-1.21_spec_env_rj.txt' // that is the explicit file but if that doesnt work try the yml file samtools-1.21_env_rj.yml; and if that doesnt work use the path to the 1.21 environment
+
+    if (params.PE) {
+
+        publishDir './results_PE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
+        publishDir './results_PE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
+        publishDir './results_PE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
+
+    }
+
+    else if(params.SE) {
+
+        publishDir './resluts_SE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
+        publishDir './resluts_SE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
+        publishDir './resluts_SE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
+
+    }
+    //publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
+    //publishDir './indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
+    //publishDir './flag_stat_log', mode: 'copy', pattern: '*stat.log'
 
     input:
     path(sam_files)
@@ -354,63 +372,175 @@ process samtools_sort {
     path("*.bai"), emit: indexed_bams
     tuple path("*_sorted.bam"), path("*.bai"), emit: bam_index_tuple
 
+    path("*stats.log"), emit: flag_stats_log
+
     script:
 
     // i will start using baseName inside the process since its easier to keep track of different names an uses less inputs into a process
     out_bam_filt = "${sam_files.baseName}_bam_filt.bam"
-    out_bam_sort = "${sam_files.baseName}_bam_filt_sorted.bam"
+    out_bam_name_sort = "${sam_files.baseName}_name_ordered.bam"
+    out_bam_coor_sort = "${sam_files.baseName}_filt_coor_sorted.bam"
+    out_bam_fixmate = "${sam_files.baseName}_fixmate.bam"
+    out_bam_final = "${sam_files.baseName}_markdup_filt_coor_sorted.bam"
+    stats_log_pe = "${sam_files.baseName}_pair_end_stats.log"
+
+    out_bam_se_filt = "${sam_files.baseName}_se_file.bam"
+    out_bam_coor_sort_se = "${sam_files.baseName}_se_file_coor_sorted.bam"
+    stats_log_se = "${sam_files.baseName}_single_end_stats.log"
+
+    if (params.PE) {
+
+        """
+        #!/usr/bin/env bash
+
+        ################# samtools parameters used ################
+        # for samtools view
+        # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
+        # --bam or -b : output in the bam format
+        # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
+
+        # for samtools sort
+        # -o : takes a file. it writes the final sorted output to file rather than standard output
+        # -O : write the final output as sam, bam, or cram
+
+        # samtools fixmate : preparing for finding the duplicates
+        # -O : specify the format and i choose bam
+        # -m : add ms(mate score) tags. these are used by markdup to select the best reads to keep 
+        # other possible option to look at is -r : remove secondary and unmapped reads ?
+        
+        # for samtools markdup : can only be done on coordinate sorted bam files and run it through samtools fixmate first
+        # -r : remove duplicate reads
+        # --mode or -m : duplicate decision method for paired reads. values are "t" or "s". read documentation but i choose s becasue it tends to return more results. just incase i will remove this option in the pair end mode by adding an if else statement in this process.
+
+        # now for samtools index to get index files
+        # -b, --bai: create a bai index; this version of samtools does not support --bai --csi just use -b -c
+        # -c, --csi: create a csi index
+        # -o, --output: write the output index to a file specified  only when one alignment file is being indexed
+
+        # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
+        # no parameters needed. just need to give the final bam file that went through all the processing
+        ###########################################################
+
+        # I should add a samtools filtering. looking to only get mapq scores higher than 30
+
+        samtools view \
+        -q 30 \
+        -b \
+        "${sam_files}" \
+        > "${out_bam_filt}" 
+        
+        
+        # first i have to name sort to use fixmate
+        samtools sort \
+        -o "${out_bam_name_sort}" \
+        -n \
+        -O bam \
+        "${out_bam_filt}"
+
+
+        samtools fixmate \
+        -O bam \
+        -m \
+        "${out_bam_name_sort}"\
+        "${out_bam_fixmate}"
+
+
+        # now i will coordinate sort here 
+        samtools sort \
+        -o "${out_bam_coor_sort}" \
+        -O bam \
+        "${out_bam_fixmate}"
+
+
+        # i might need to put coordinate sorted bam into markdup
+        # this works but removing the duplicates results in the file being very small meaning too many reads were removed that were considered duplicates.
+        # this results in the next process deeptools not being able to create a normalized bedgraph file
+
+        #samtools markdup \
+        #"\${out_bam_coor_sort}" \
+        #"\${out_bam_final}"
+
+        # so i will just use the out file from the coordinate sort samtools sort section instead of using out_bam_final
+        samtools index \
+        -b \
+        "${out_bam_coor_sort}"
+
+        samtools flagstat \
+        "${out_bam_coor_sort}" \
+        > "${stats_log_pe}"
+
+        """
 
 
 
-    """
-    #!/usr/bin/env bash
+    }
+    else if (params.SE) {
 
-    ################# samtools parameters used ################
-    # for samtools view
-    # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
-    # --bam or -b : output in the bam format
-    # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
+        """
+        #!/usr/bin/env bash
 
-    # for samtools sort
-    # -o : takes a file. it writes the final sorted output to file rather than standard output
-    # -O : write the final output as sam, bam, or cram
+        ################# samtools parameters used ################
+        # for samtools view
+        # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
+        # --bam or -b : output in the bam format
+        # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
 
-    # now for samtools index to get index files
-    # -b, --bai: create a bai index; this version of samtools does not support --bai --csi just use -b -c
-    # -c, --csi: create a csi index
-    # -o, --output: write the output index to a file specified  only when one alignment file is being indexed
+        # for samtools sort
+        # -o : takes a file. it writes the final sorted output to file rather than standard output
+        # -O : write the final output as sam, bam, or cram
 
-    ###########################################################
+        # samtools fixmate : preparing for finding the duplicates
+        # -O : specify the format and i choose bam
+        # -m : add ms(mate score) tags. these are used by markdup to select the best reads to keep 
+        # other possible option to look at is -r : remove secondary and unmapped reads ?
+        
+        # for samtools markdup : can only be done on coordinate sorted bam files and run it through samtools fixmate first
+        # -r : remove duplicate reads
+        # --mode or -m : duplicate decision method for paired reads. values are "t" or "s". read documentation but i choose s becasue it tends to return more results. just incase i will remove this option in the pair end mode by adding an if else statement in this process.
 
-    # I should add a samtools filtering. looking to only get mapq scores higher than 30
+        # now for samtools index to get index files
+        # -b, --bai: create a bai index; this version of samtools does not support --bai --csi just use -b -c
+        # -c, --csi: create a csi index
+        # -o, --output: write the output index to a file specified  only when one alignment file is being indexed
 
-    samtools view \
-    -q 30 \
-    -b \
-    "${sam_files}" \
-    > "${out_bam_filt}" 
-     
+        # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
+        # no parameters needed. just need to give the final bam file that went through all the processing
+
+
+        ###########################################################
+
+        # I should add a samtools filtering. looking to only get mapq scores higher than 30
+
+        samtools view \
+        -q 30 \
+        -b \
+        "${sam_files}" \
+        > "${out_bam_se_filt}" 
+        
+
+
+
+        # now i will coordinate sort here 
+        samtools sort \
+        -o "${out_bam_coor_sort_se}" \
+        -O bam \
+        "${out_bam_se_filt}"
+
+
+        # so i will just use the out file from the coordinate sort samtools sort section instead of using out_bam_final
+        samtools index \
+        -b \
+        "${out_bam_coor_sort_se}"
+
+        samtools flagstat \
+        "${out_bam_coor_sort_se}" \
+        > "${stats_log_se}"
+
+        """
+
+    }
+
     
-
-    samtools sort \
-    -o "${out_bam_sort}" \
-    -O bam \
-    "${out_bam_filt}"
-
-    # so i will use the out_bam for input to samtools index since it has to be coordinate sorted
-    # I will not make an out file name since I hope samtools index will just add the prefix
-    # i was not able to use both -b and -c in the same samtools index call. i can just write another samtools index with -c instead if i want that index also.
-
-    samtools index \
-    -b \
-    "${out_bam_sort}" 
-
-
-
-
-
-
-    """
 }
 
 process deeptools_make_bed {
@@ -825,6 +955,68 @@ process bwa_PE_aln {
     """
 }
 
+process multiqc_bam_stats {
+
+    conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
+
+    if (params.PE) {
+
+        publishDir './results_PE/flag_stat_log/complete_log', mode: 'copy', pattern: '*.html'
+    
+    }
+    else {
+
+        publishDir './results_SE/flag_sta_log/complete_log', mode: 'copy', pattern: '*.html'    
+    }
+
+    input:
+
+    path(stats_log_files)
+
+
+    output:
+    path("*.html"), emit: bams_multiqc_html
+
+
+    script:
+
+    if (params.PE) {
+
+        """
+
+        #### parameters for multiqc ###
+
+        # no real parameters
+        ###############################
+        
+        multiqc . \
+        --title "Pair end bams QC"
+
+
+
+        """
+
+    }
+    else if (params.SE) {
+
+        """
+
+        #### parameters for multiqc ###
+
+        # no real parameters
+        ###############################
+        
+        multiqc . \
+        --title "Single end bams QC"
+
+
+
+        """
+
+    }
+    
+}
+
 workflow {
 
     // this is the end seq alignment steps first
@@ -969,6 +1161,7 @@ workflow {
             sorted_bams_ch = samtools_sort.out.sorted_bams
             indexed_bams_ch = samtools_sort.out.indexed_bams
             both_bam_index_ch = samtools_sort.out.bam_index_tuple
+            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
 
             // if you want to filter black list use the param --BL in the command line when calling nextflow
             if ( params.BL ) {
@@ -1075,6 +1268,7 @@ workflow {
             samtools_sort.out.bam_index_tuple.view()
 
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
+            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
 
             // this will give a blacklist filtered bam but i need to index it again
             bedtools_filt_blacklist(bam_index_tuple_ch, blacklist_ch)
@@ -1104,6 +1298,8 @@ workflow {
 
             samtools_sort.out.bam_index_tuple.view()
 
+            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
 
             // just using the original sorted and indexed bam
@@ -1117,7 +1313,11 @@ workflow {
 
         }
 
+        
 
-
+ 
     }
+
+    // making a multiqc process for the samtools flagstat log files. this should be able to take the flagstat_log_ch from any part of the choosen paths
+    multiqc_bam_stats(flagstat_log_ch)
 }

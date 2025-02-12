@@ -9,7 +9,7 @@
 
 source $HOME/.bashrc_rj_test.sh
 
-conda activate nextflow_two
+conda activate nextflow_three
 
 # --PE parameter for single end reads
 # --SE parameter for pair end reads
@@ -32,14 +32,16 @@ conda activate nextflow_two
 #--SE \
 #--single_end_reads '/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz' \
 #--ada_seq --adapter_seq_str 'AGATCGGAAGAGC' \
-#--BL
+#--BL \
 
-nextflow run nasa_pipeline.nf -profile 'nasa_pipeline ' \
+
+
+nextflow run nasa_pipeline.nf -profile 'nasa_pipeline' \
 -resume \
 --PE \
---BL \
--preview \
--with-dag fastq2bam_nf_pipeline_flowchart.png
+--BL 
+
+#-with-dag fastq2bam_nf_pipeline_flowchart.png
  
 
  # NOTE: If you want to make your own nextflow diagram to see how the pipeline works run this command
