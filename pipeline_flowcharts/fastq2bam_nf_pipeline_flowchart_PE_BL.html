@@ -23,6 +23,7 @@ flowchart TB
     subgraph " "
     v0["Channel.fromFilePairs"]
     v10["genome_ch"]
+    v20["blacklist_ch"]
     end
     v2([fastp_PE])
     subgraph " "
@@ -34,18 +35,25 @@ flowchart TB
     v15[" "]
     v16[" "]
     v18[" "]
-    v21[" "]
+    v23[" "]
+    v27[" "]
+    v29[" "]
     end
     v5([fastqc_PE])
     v8([multiqc_PE])
     v11([bwa_index_genome])
     v12([bwa_PE_aln])
     v14([samtools_sort])
-    v19([deeptools_make_bed])
+    v21([bedtools_filt_blacklist])
+    v24([samtools_bl_index])
+    v25([deeptools_make_bed])
+    v28([multiqc_bam_stats])
     v1(( ))
     v7(( ))
     v17(( ))
-    v20(( ))
+    v19(( ))
+    v22(( ))
+    v26(( ))
     v0 --> v1
     v1 --> v2
     v2 --> v5
@@ -63,11 +71,19 @@ flowchart TB
     v12 --> v13
     v14 --> v16
     v14 --> v15
-    v14 --> v19
+    v14 --> v21
     v14 --> v17
+    v14 --> v19
     v17 --> v18
-    v19 --> v20
     v20 --> v21
+    v21 --> v24
+    v21 --> v22
+    v22 --> v23
+    v24 --> v25
+    v25 --> v26
+    v26 --> v27
+    v19 --> v28
+    v28 --> v29
 
 </pre>
 <script type="module">
