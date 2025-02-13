@@ -12,6 +12,7 @@ source $HOME/.bashrc_rj_test.sh
 conda activate nextflow_three
 
 ########## for SE data ###############
+# --ATAC : if you have atac-seq data, please specify this parameter
 # --SE parameter for pair end reads
 # when using SE do --single_end_reads and give the path to your single end reads with a glob pattern if you have other files in that directory you dont want ex: path/to/single_end_reads/*file*.fastq
 # if you have an adapter sequence use --ada_seq, then specify the sequence with --adapter_seq_str which will take the string sequence
@@ -24,6 +25,7 @@ conda activate nextflow_three
 # I will not put an option to specify adapters and put your own sequence for the Pair End part of this pipeline
 # The reason being i specified in fastp that we will look adapters for PE and just trim them. read the parameters used for the fastp tool in the fastp_PE process
 
+# --ATAC : if you have atac-seq data, please specify this parameter
 # --genome : give the path to the reference genome file you want to use. if you dont specify then the defualt hg19 genome will be used
 # --PE : lets the pipeline know you have pair end data
 # --paired_end_reads : you need to then also use this parameter to specify the path and the glob pattern to get your forward and reverse reads together in the same input channel. EX: path/to/pair_end_reads/*my_pair_end_file*_{R1,R2}*.fastq 
@@ -47,6 +49,7 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'nasa_pipeline' \
 -resume \
 --PE \
 --BL 
+#--ATAC
 
  
 

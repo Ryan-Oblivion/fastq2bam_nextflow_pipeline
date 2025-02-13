@@ -671,12 +671,32 @@ process samtools_bl_index {
     //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
     if (params.PE) {
 
-        publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+        if (params.ATAC) {
+
+            publishDir './results_PE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+
+        }
+        else {
+
+            publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+        }
+
+       
     
     }
     else {
 
-        publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'    
+        if (params.ATAC) {
+
+            publishDir './results_SE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+
+        }
+        else {
+
+            publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+        }
+
+          
     }
 
     input:
@@ -685,11 +705,12 @@ process samtools_bl_index {
 
     output:
 
-    tuple path("${bl_filt_bam}"), path("*.bai"), emit: bl_filt_bam_index_tuple
+    tuple path("${out_bam_name_sort}"), path("*.bai"), emit: bl_filt_bam_index_tuple
 
 
     script:
     
+    out_bam_name_sort = "${bl_filt_bam.baseName}.bam"
 
     """
     ####### parameters for indexing bam ######
@@ -697,9 +718,18 @@ process samtools_bl_index {
 
     ##########################################
 
+    # just do some sorting 
+
+    samtools sort \
+    -o "${out_bam_name_sort}" \
+    -O bam \
+    "${bl_filt_bam}"
+
+
+
     samtools index \
     -b \
-    "${bl_filt_bam}" 
+    "${out_bam_name_sort}" 
 
     """
 }
@@ -1017,6 +1047,57 @@ process multiqc_bam_stats {
     
 }
 
+process deeptools_aln_shift {
+
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/deeptools_rj'
+
+    if (params.PE) {
+
+        publishDir './results_PE/atac_shift_bam', mode: 'copy', pattern: '*shift.bam'
+    }
+    else {
+
+        publishDir './results_SE/atac_shift_bam', mode: 'copy', pattern: '*shift.bam'
+    }
+
+
+    input:
+    tuple path(bam), path(index)
+
+
+    output:
+    tuple path("*shift.bam"), emit: atac_shifted_bam
+
+
+    script:
+    out_file = "${bam.baseName}_ATAC_shift.bam"
+
+    """
+    #!/usr/bin/env bash 
+
+    ##### deeptools alignmentSieve params #####
+    # --bam : this takes your input bam file
+    # --numberofProcessors : number of threads 
+    # --ATACshift : Shift the produced BAM file or BEDPE regions as commonly done for ATAC-seq
+    ###########################################
+
+    alignmentSieve \
+    --bam "${bam}" \
+    --numberOfProcessors 12 \
+    --ATACshift \
+    -o "${out_file}"
+
+
+
+
+    """
+}
+
+
+// finally using modules
+
+include {samtools_index_sort} from './modules/fastq2bam_dna_modules.nf'
+
 workflow {
 
     // this is the end seq alignment steps first
@@ -1276,21 +1357,66 @@ workflow {
 
             bl_filt_bams_ch = bedtools_filt_blacklist.out.bl_filtered_bams
             // so using the process to only index which means it will take the blacklist bam file
-
-            samtools_bl_index(bl_filt_bams_ch)
+            
+            samtools_bl_index(bl_filt_bams_ch) 
 
             bl_filt_bam_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
 
             // so this would give a bam that is bl filtered and has an index
+
+            if ( params.ATAC ) {
+
+
+                // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
+
+                deeptools_aln_shift(bl_filt_bam_tuple_ch)
+
+                atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
+                atac_shift_bam_ch.view()
+
+                // now i have to re index this new atac shifted bam. dispite the name of the process I can just pass any future created bam to this channel to be indexed
+
+                samtools_index_sort(atac_shift_bam_ch )
+
+                // so now name the tuple channel output appropriately 
+                atac_shift_bam_index_ch = samtools_index_sort.out.bl_filt_bam_index_tuple
+
+                // now making the bed files for atac seq
+
+                deeptools_make_bed(atac_shift_bam_index_ch)
+
+                deeptools_make_bed.out.bed_files_normalized.view()
+
+                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+
+
+
+            }
+            else {
+
+
+
+                // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
+
+                deeptools_make_bed(bl_filt_bam_tuple_ch)
+
+                deeptools_make_bed.out.bed_files_normalized.view()
+
+                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
+
+
+            }
+            
             
             // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
 
-            deeptools_make_bed(bl_filt_bam_tuple_ch)
+            //deeptools_make_bed(bl_filt_bam_tuple_ch)
 
-            deeptools_make_bed.out.bed_files_normalized.view()
+            //deeptools_make_bed.out.bed_files_normalized.view()
 
-            bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+            //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
+            
 
         }
         else {
@@ -1302,13 +1428,64 @@ workflow {
 
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
 
+            // add the if logic for ATAC here
+
+            if (params.ATAC) {
+
+
+                // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
+
+                deeptools_aln_shift(bam_index_tuple_ch)
+
+                atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
+
+                // now i have to re index this new atac shifted bam. dispite the name of the process I can just pass any future created bam to this channel to be indexed
+
+                samtools_index_sort(atac_shift_bam_ch)
+
+                // so now name the tuple channel output appropriately 
+                atac_shift_bam_index_ch = samtools_index_sort.out.bl_filt_bam_index_tuple
+
+                // now making the bed files for atac seq
+
+                deeptools_make_bed(atac_shift_bam_index_ch)
+
+                deeptools_make_bed.out.bed_files_normalized.view()
+
+                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+
+
+
+            }
+            else {
+
+
+
+                // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
+
+                deeptools_make_bed(bam_index_tuple_ch)
+
+                deeptools_make_bed.out.bed_files_normalized.view()
+
+                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
+
+
+            }
+
+
+
+
+
+
             // just using the original sorted and indexed bam
+            
+            // i will comment this out below since it was the original but the above if logic should work if there is ATAC data or if there is not
 
-            deeptools_make_bed(bam_index_tuple_ch)
+            //deeptools_make_bed(bam_index_tuple_ch)
 
-            deeptools_make_bed.out.bed_files_normalized.view()
+            //deeptools_make_bed.out.bed_files_normalized.view()
 
-            bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+            //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
 
         }
@@ -1320,4 +1497,6 @@ workflow {
 
     // making a multiqc process for the samtools flagstat log files. this should be able to take the flagstat_log_ch from any part of the choosen paths
     multiqc_bam_stats(flagstat_log_ch)
+
+
 }
