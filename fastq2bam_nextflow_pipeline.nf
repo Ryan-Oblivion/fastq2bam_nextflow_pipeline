@@ -15,8 +15,8 @@ process fastp_SE_adapter_known {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './fastp_qc_single_end', mode: 'copy', pattern:'*_fp_filt.fastq'
-    publishDir './fastp_qc_single_end/html_reports', mode: 'copy', pattern:'*.html'
+    publishDir './results_SE/fastp_qc_single_end', mode: 'copy', pattern:'*_fp_filt.fastq'
+    publishDir './results_SE/fastp_qc_single_end/html_reports', mode: 'copy', pattern:'*.html'
 
     input:
     // input names dont have to be the exact same as what is seen in the workflow section of this script
@@ -95,8 +95,8 @@ process fastp_SE {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './fastp_qc_single_end', mode: 'copy', pattern:'*_fp_filt.fastq'
-    publishDir './fastp_qc_single_end/html_reports', mode: 'copy', pattern:'*.html'
+    publishDir './results_SE/fastp_qc_single_end', mode: 'copy', pattern:'*_fp_filt.fastq'
+    publishDir './results_SE/fastp_qc_single_end/html_reports', mode: 'copy', pattern:'*.html'
 
     input:
     // input names dont have to be the exact same as what is seen in the workflow section of this script
@@ -166,7 +166,7 @@ process fastp_SE {
 process fastqc_SE {
     // using the conda environment 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
-    publishDir './fastqc_htmls', mode: 'copy', pattern: '*.html'
+    publishDir './results_SE/fastqc_htmls', mode: 'copy', pattern: '*.html'
 
 
     input:
@@ -201,7 +201,7 @@ process multiqc_SE {
 
     //conda '/ru-auth/local/home/rjohnson/miniconda3/envs/multiqc_rj'
     
-    publishDir './multiQC_collection', mode: 'copy', pattern: '*.html'
+    publishDir './results_SE/multiQC_collection', mode: 'copy', pattern: '*.html'
 
     input:
     path(fastp_filt_html)
@@ -278,8 +278,8 @@ process bwa_index_genome {
 process bwa_align_SE {
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
-    publishDir './bwa_outputs_singleEnd_SAM', mode: 'copy', pattern: '*.sam'
-    publishDir './sai_alignment_files', mode: 'copy', pattern: '*.sai'
+    publishDir './results_SE/bwa_outputs_singleEnd_SAM', mode: 'copy', pattern: '*.sam'
+    publishDir './results_SE/sai_alignment_files', mode: 'copy', pattern: '*.sai'
 
 
     input:
@@ -351,9 +351,9 @@ process samtools_sort {
 
     else if(params.SE) {
 
-        publishDir './resluts_SE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './resluts_SE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
-        publishDir './resluts_SE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
+        publishDir './results_SE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
+        publishDir './results_SE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
+        publishDir './results_SE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
 
     }
     //publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
@@ -708,13 +708,13 @@ process fastp_PE {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './fastp_pe_results/filt_fastqs', mode: 'copy', pattern: '*_filt_{R1,R2}*'
+    publishDir './results_PE/fastp_pe_results/filt_fastqs', mode: 'copy', pattern: '*_filt_{R1,R2}*'
 
-    publishDir './fastp_pe_results/merged_filt_fastqs', mode: 'copy', pattern: '*_merged*'
+    publishDir './results_PE/fastp_pe_results/merged_filt_fastqs', mode: 'copy', pattern: '*_merged*'
 
-    publishDir './fastp_pe_results/failed_qc_reads', mode: 'copy', pattern: '*_failed_filter*'
+    publishDir './results_PE/fastp_pe_results/failed_qc_reads', mode: 'copy', pattern: '*_failed_filter*'
 
-    publishDir './fastp_pe_results/htmls', mode: 'copy', pattern: '*fastp.html'
+    publishDir './results_PE/fastp_pe_results/htmls', mode: 'copy', pattern: '*fastp.html'
 
 
     input:
@@ -804,7 +804,7 @@ process fastqc_PE {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
 
-    publishDir './fastqc_pe_files', mode: 'copy', pattern: '*'
+    publishDir './results_PE/fastqc_pe_files', mode: 'copy', pattern: '*'
 
     input:
    
@@ -848,7 +848,7 @@ process multiqc_PE {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
 
-    publishDir './multiqc_PE_output', mode: 'copy', pattern: '*'
+    publishDir './results_PE/multiqc_PE_output', mode: 'copy', pattern: '*'
 
 
     input:
@@ -892,8 +892,8 @@ process bwa_PE_aln {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
-    publishDir './pe_bwa_files/pe_sam_files', mode: 'copy', pattern: '*.sam'
-    publishDir './pe_bwa_files/pe_sai_index_files', mode: 'copy', pattern: '*.sai'
+    publishDir './results_PE/pe_bwa_files/pe_sam_files', mode: 'copy', pattern: '*.sam'
+    publishDir './results_PE/pe_bwa_files/pe_sai_index_files', mode: 'copy', pattern: '*.sai'
     //cache false 
 
 
@@ -1152,7 +1152,7 @@ workflow {
             // I will hopefully be able to do this outside of the if else statement so the sam file from both conditions can be passed to the same samtools process
             // since i am just testing the pipeline i should find a way to do this on only a few files (about 3-4)
             
-            samtools_sort(sam_files.take(3)) // using take 3 should only take the first 3 files from the sam_files channel which should have 64 sam files. This is just for production and testing. will remove when running pipeline for real.
+            samtools_sort(sam_files) // using take 3 should only take the first 3 files from the sam_files channel which should have 64 sam files. This is just for production and testing. will remove when running pipeline for real.
 
             //samtools_sort.out.sorted_bams.view()
             //samtools_sort.out.indexed_bams.view()
