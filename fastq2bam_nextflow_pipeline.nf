@@ -587,8 +587,60 @@ process deeptools_make_bed {
 
     out_bed_name="${bams.baseName}_normalized_cpm.bed"
 
+    if (params.use_effectiveGenomeSize) {
 
-    """
+        """
+
+        ###### Using deeptools parameters ###############
+
+        # first converting the bam file to a bed file using bamCoverage. I can also make a bigwig file if needed, it stores data better but is binary and cannot be opened in text editor
+        # -b or --bam: takes the bam file that will be processed
+        # -o or --outFileName: is the name you want the output file to have
+        # -of or --outFileFormat: is the type of output file you want; either "bigwig" or "bedgraph"
+        # --scaleFactor: the computed scaling factor (or 1, if not applicable) will be multiplied by this.
+        # -bs or --binSize: are the size of the bins in bases, for output of bigwig or bedgraph. default is 50
+        # -p or --numberOfProcessors: this is the number of processers you want to use. Not using this option yet but if needed I will use it.
+        # --normalizeUsing: choose the type of normalization
+        # bamCoverage offers normalization by scaling factor, Reads Per Kilobase per Million mapped reads (RPKM), counts per million (CPM), bins per million mapped reads (BPM) and 1x depth (reads per genome coverage, RPGC).
+        # --effectiveGenomeSize: choose the mappable genome size for your organism of choice used as reference. find length here: https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html
+        # not using effectiveGenomeSize since multiple users will use this pipeline and might not be using the same organism.
+        # actually i decided to use effectiveGenomeSize afterall since i can split this process into using it or not.
+
+        # NOTE: since all the files will be processed using this tool and parameters, they will all be directly comparable in UCSC or IGV without needing to edit track heights.
+        #################################################
+
+
+        bamCoverage \
+        --bam "${bams}" \
+        --outFileName "${out_bed_name}" \
+        --outFileFormat "bedgraph" \
+        --scaleFactor 1 \
+        --binSize 50 \
+        --normalizeUsing CPM \
+        --effectiveGenomeSize "${params.num_effectiveGenomeSize}"
+
+
+        """
+
+
+    }
+    else {
+
+        """
+
+        bamCoverage \
+        --bam "${bams}" \
+        --outFileName "${out_bed_name}" \
+        --outFileFormat "bedgraph" \
+        --scaleFactor 1 \
+        --binSize 50 \
+        --normalizeUsing CPM
+
+        """
+
+    }
+
+    /*"""
     ###### Using deeptools parameters ###############
 
     # first converting the bam file to a bed file using bamCoverage. I can also make a bigwig file if needed, it stores data better but is binary and cannot be opened in text editor
@@ -615,7 +667,7 @@ process deeptools_make_bed {
     --normalizeUsing CPM
 
 
-    """
+    """*/
 }
 
 process bedtools_filt_blacklist {
@@ -668,17 +720,21 @@ process bedtools_filt_blacklist {
 process samtools_bl_index {
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj'
 
+    
+
     //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
     if (params.PE) {
 
         if (params.ATAC) {
 
             publishDir './results_PE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_PE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
 
         }
         else {
 
             publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
         }
 
        
@@ -689,11 +745,13 @@ process samtools_bl_index {
         if (params.ATAC) {
 
             publishDir './results_SE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_SE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
 
         }
         else {
 
             publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
         }
 
           
@@ -710,7 +768,7 @@ process samtools_bl_index {
 
     script:
     
-    out_bam_name_sort = "${bl_filt_bam.baseName}.bam"
+    out_bam_name_sort = "${bl_filt_bam.baseName}_sort2.bam"
 
     """
     ####### parameters for indexing bam ######
@@ -1261,20 +1319,106 @@ workflow {
 
                 bl_filt_bam_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
 
+                if ( params.ATAC ) {
+
+
+                    // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
+
+                    deeptools_aln_shift(bl_filt_bam_tuple_ch)
+
+                    atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
+                    atac_shift_bam_ch.view()
+
+                    // now i have to re index this new atac shifted bam. dispite the name of the process I can just pass any future created bam to this channel to be indexed
+
+                    samtools_index_sort(atac_shift_bam_ch )
+
+                    // so now name the tuple channel output appropriately 
+                    atac_shift_bam_index_ch = samtools_index_sort.out.bl_filt_bam_index_tuple
+
+                    // now making the bed files for atac seq
+
+                    deeptools_make_bed(atac_shift_bam_index_ch)
+
+                    deeptools_make_bed.out.bed_files_normalized.view()
+
+                    bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+
+
+
+                }
+                else {
+
+
+
+                    // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
+
+                    deeptools_make_bed(bl_filt_bam_tuple_ch)
+
+                    deeptools_make_bed.out.bed_files_normalized.view()
+
+                    bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
+
+
+                }
+
                 // then i need to pass the indexed_bl_bam and the bam to the deeptools process
 
-                deeptools_make_bed(bl_filt_bam_tuple_ch)
-                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+                //deeptools_make_bed(bl_filt_bam_tuple_ch)
+                //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
             }
 
             else {
 
+
+                if (params.ATAC) {
+
+
+                    // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
+
+                    deeptools_aln_shift(both_bam_index_ch)
+
+                    atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
+
+                    // now i have to re index this new atac shifted bam. dispite the name of the process I can just pass any future created bam to this channel to be indexed
+
+                    samtools_index_sort(atac_shift_bam_ch)
+
+                    // so now name the tuple channel output appropriately 
+                    atac_shift_bam_index_ch = samtools_index_sort.out.bl_filt_bam_index_tuple
+
+                    // now making the bed files for atac seq
+
+                    deeptools_make_bed(atac_shift_bam_index_ch)
+
+                    deeptools_make_bed.out.bed_files_normalized.view()
+
+                    bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+
+
+
+                }
+                else {
+
+
+
+                    // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
+
+                    deeptools_make_bed(both_bam_index_ch)
+
+                    deeptools_make_bed.out.bed_files_normalized.view()
+
+                    bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
+
+
+                }
+
                 // Now i want to pass the tuple that has the bam and its corresponding index file into a process that will create a bigwig file for visulization, created from the bam file. This will show read coverage in the genome without looking for significant areas
-                deeptools_make_bed(both_bam_index_ch)
+                //deeptools_make_bed(both_bam_index_ch)
 
                 //deeptools_make_bed.out.bed_files_normalized.view()
-                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+                //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
             }
     
 
