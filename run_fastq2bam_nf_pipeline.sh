@@ -38,6 +38,13 @@ conda activate nextflow_three
 
 ######################################
 
+# give option for spike in
+# NOTE: for endseq and gloeseq have a branch of the pipeline aligning to the T7 and lamda genome with the same data. Important to know the number of reads and dup rate
+# NOTE:  FOR RICC seq yeast
+
+# NOTE: path to the peak files /lustre/fs4/home/ascortea/store/ascortea/beds
+     # then get the different peak directories IMR90, k562, BJ subdirectories hold these peak files
+
 
 #nextflow run fastq2bam_nextflow_pipeline.nf -profile 'nasa_pipeline ' \
 #-resume \
@@ -49,12 +56,13 @@ conda activate nextflow_three
 
 
 
-nextflow run fastq2bam_nextflow_pipeline.nf -profile 'nasa_pipeline' \
+nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 -resume \
 --PE \
 --BL \
 --use_effectiveGenomeSize \
---num_effectiveGenomeSize '2864785220'
+--num_effectiveGenomeSize '2864785220' \
+--calc_break_density
 
 #--ATAC
 

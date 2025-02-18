@@ -1156,6 +1156,12 @@ process deeptools_aln_shift {
 
 include {samtools_index_sort} from './modules/fastq2bam_dna_modules.nf'
 
+
+
+// i want to include another workflow script
+
+include {breakDensityWrapper_workflow} from './workflows/breakDensityWrapper_workflow.nf'
+
 workflow {
 
     // this is the end seq alignment steps first
@@ -1215,7 +1221,7 @@ workflow {
             // if the adapter sequence is known then input it as a string if not dont use the parameter
             if ( params.ada_seq ) {
 
-                params.adapter_seq_str = 'AGATCGGAAGAGC' // this is just a place holder value for the adapter sequence
+                params.adapter_seq_str = 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCA' // this is just a place holder value for the adapter sequence
                 adapter_ch = Channel.value(params.adapter_seq_str)
 
                 fastp_SE_adapter_known(se_reads_files.take(3), se_reads_name.take(3), adapter_ch) // will have to make a new process for if the adapter sequence is known
@@ -1490,14 +1496,14 @@ workflow {
             // using the same samtools sort process found in the SE part of the pipeline
             samtools_sort(sam_files_pe_ch)
 
-            samtools_sort.out.bam_index_tuple.view()
+            //samtools_sort.out.bam_index_tuple.view()
 
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
             flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
 
             // this will give a blacklist filtered bam but i need to index it again
             bedtools_filt_blacklist(bam_index_tuple_ch, blacklist_ch)
-            bedtools_filt_blacklist.out.bl_filtered_bams.view()
+            //bedtools_filt_blacklist.out.bl_filtered_bams.view()
 
             bl_filt_bams_ch = bedtools_filt_blacklist.out.bl_filtered_bams
             // so using the process to only index which means it will take the blacklist bam file
@@ -1516,7 +1522,7 @@ workflow {
                 deeptools_aln_shift(bl_filt_bam_tuple_ch)
 
                 atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
-                atac_shift_bam_ch.view()
+                //atac_shift_bam_ch.view()
 
                 // now i have to re index this new atac shifted bam. dispite the name of the process I can just pass any future created bam to this channel to be indexed
 
@@ -1529,7 +1535,7 @@ workflow {
 
                 deeptools_make_bed(atac_shift_bam_index_ch)
 
-                deeptools_make_bed.out.bed_files_normalized.view()
+                //deeptools_make_bed.out.bed_files_normalized.view()
 
                 bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
@@ -1544,7 +1550,7 @@ workflow {
 
                 deeptools_make_bed(bl_filt_bam_tuple_ch)
 
-                deeptools_make_bed.out.bed_files_normalized.view()
+                //deeptools_make_bed.out.bed_files_normalized.view()
 
                 bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
 
@@ -1566,7 +1572,7 @@ workflow {
         else {
             samtools_sort(sam_files_pe_ch)
 
-            samtools_sort.out.bam_index_tuple.view()
+            //samtools_sort.out.bam_index_tuple.view()
 
             flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
 
@@ -1594,7 +1600,7 @@ workflow {
 
                 deeptools_make_bed(atac_shift_bam_index_ch)
 
-                deeptools_make_bed.out.bed_files_normalized.view()
+                //deeptools_make_bed.out.bed_files_normalized.view()
 
                 bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
@@ -1609,7 +1615,7 @@ workflow {
 
                 deeptools_make_bed(bam_index_tuple_ch)
 
-                deeptools_make_bed.out.bed_files_normalized.view()
+                //deeptools_make_bed.out.bed_files_normalized.view()
 
                 bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
 
@@ -1643,4 +1649,46 @@ workflow {
     multiqc_bam_stats(flagstat_log_ch)
 
 
+    
+    // I want to have a parameter that takes peakfiles. The default will be the IMR90 narrowPeak files
+    params.peak_files = files('/lustre/fs4/home/ascortea/store/ascortea/beds/IMR90/*.narrowPeak')
+    //now making the channel for the files
+    peak_files_ch = Channel.value(params.peak_files)
+
+
+    if (params.calc_break_density){
+    // i want to call the workflow breakDensityWrapper_workflow and pass the bam_index_tuple_ch as an input from either path where the user chose to do blacklist filter or not. Then also pass the peak files that already exists or are created later as input
+    
+        if (params.PE) {
+
+            if (params.BL) {
+
+                breakDensityWrapper_workflow(bl_filt_bam_tuple_ch, peak_files_ch)
+
+            }
+            else {
+                breakDensityWrapper_workflow(bam_index_tuple_ch, peak_files_ch)
+
+            }
+            
+
+        }
+
+        if (params.SE) {
+
+            if (params.BL) {
+
+                breakDensityWrapper_workflow(bl_filt_bam_tuple_ch, peak_files_ch)
+
+            }
+            else {
+
+                breakDensityWrapper_workflow(both_bam_index_ch, peak_files_ch)
+
+            }
+
+            
+        }
+    }
+    
 }

@@ -74,6 +74,9 @@ process samtools_index_sort {
 
 
 process mk_break_points {
+    // this is my attempt at creating the break density script, but i will try another process where I just call the break density wrapper.
+
+    // all the wrapper does is make each peak file work with each bam file. so just make a process that takes the bam file and run all the break density scripts with each peak file. each bam will work with all the peak files in their own process instance.
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/bedtools_rj'
 
@@ -140,15 +143,28 @@ process mk_break_points {
 
 
 
-/*
-process breakDensityWrapper {
 
+process breakDensityWrapper_process {
+
+    publishDir './break_density_calc', mode: 'copy', pattern: '*'
+    
 
     input:
+    // input has to be files that the breakDensityWrapper.sh script takes
+    
+    // it takes the bam files that have reads aligned to the reference genome. So I think it is best to collect all of the generated bams and ensure PLC is one of the bams.
+    path(bams)
+    
+    // then it takes the peak files found in the directory  /lustre/fs4/home/ascortea/store/ascortea/beds
+    path(peak_files)
 
 
     output:
 
+    // output will be an AdjustedEnrichment.tsv
+    path("adjustedEnrichment.tsv"), emit: adjusted_E_tsv
+    path("Adjusted_Enrichment_of_*_Plot.pdf"), emit: break_plot_pdf
+    path("densityCalculations.log"), emit: density_calc_log
 
 
     script:
@@ -157,46 +173,11 @@ process breakDensityWrapper {
     """
     #!/usr/bin/env bash
 
+    # nextflow can find stuff in the bin dir but not recursively, so i have to specify the sub dir
 
-    source /ru-auth/local/home/risc_soft/miniconda3/etc/profile.d/conda.sh
-
-    #Main
-    # Iterate through arguments looking for bams, and for each bam iterate through arguments again looking for beds or peaks to construct command for getting break density within the bed.
-    #breakDensities=()
-    echo "Making densityCalculations.log\n"
-    echo "bam	bed	Expected_Density	Observed_Density	Enrichment" > densityCalculations.log
-    for peak in $@
-        do 
-            echo "iterating"
-            if [[ \$peak == *.bed ]] || [[ \$peak == *Peak ]]
-            then
-                echo "Working on \$peak"
-                for bam in $@
-                    do
-                        if [[ \$bam == *.bam ]]
-                            then
-                                echo "Working on \$bam"
-                                echo "expectedDensity"
-                                conda activate rstudio
-                                expectedDensity=$(Rscript /lustre/fs4/home/ascortea/Risc_scratch/ascortea/scripts/BreakDensity/getUniformBreakDensity.R \$peak hg19)
-                                echo \$expectedDensity
-                                conda activate fastq2bam
-                                bash /lustre/fs4/home/ascortea/Risc_scratch/ascortea/scripts/BreakDensity/getBreakDensityInPeaksV3.sh \$bam \$peak
-                                observedDensity=$(awk '{ total += \$4 } END { print total }' \${bam##}.\${peak##}.numBreaksInPeaksNormalized.bed)
-                                echo \$observedDensity
-                                enrichment=$(awk -v obs="\$observedDensity" -v expt="\$expectedDensity" 'BEGIN {print obs/expt}')
-                                echo \$enrichment
-                                echo "saving results into densityCalculations.log"
-                                echo "\$bam	\$peak	\$expectedDensity	\$observedDensity	\$enrichment" >> densityCalculations.log
-                        fi
-                    done
-            fi
-        done
-    echo "Making plot and .tsv of adjustedEnrichments"
-    conda activate rstudio
-    Rscript /lustre/fs4/home/ascortea/Risc_scratch/ascortea/scripts/BreakDensity/calculateAdjustedEnrichmentV2.R densityCalculations.log
-    echo "All done!"
-
+    breakDensityWrapper.sh "${bams}" "${peak_files}"
+    
+    # this works but for some reason it is not seeing the output so it can be put in the published dir and also in the emit channels.
 
 
 
@@ -205,4 +186,4 @@ process breakDensityWrapper {
 
 
 
-}*/
+}
