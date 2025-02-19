@@ -373,6 +373,8 @@ process samtools_sort {
     tuple path("*_sorted.bam"), path("*.bai"), emit: bam_index_tuple
 
     path("*stats.log"), emit: flag_stats_log
+    path("*stats.txt"), emit: norm_stats_txt
+    path("*stats.tsv"), emit: tsv_SN_stats
 
     script:
 
@@ -382,11 +384,15 @@ process samtools_sort {
     out_bam_coor_sort = "${sam_files.baseName}_filt_coor_sorted.bam"
     out_bam_fixmate = "${sam_files.baseName}_fixmate.bam"
     out_bam_final = "${sam_files.baseName}_markdup_filt_coor_sorted.bam"
-    stats_log_pe = "${sam_files.baseName}_pair_end_stats.log"
+    flagstats_log_pe = "${sam_files.baseName}_pair_end_stats.log"
+    samtools_stats_log_pe = "${sam_files.baseName}_pe_stats.txt"
+    tsv_file_with_stats_pe = "${sam_files.baseName}_pe_SN_stats.tsv"
 
     out_bam_se_filt = "${sam_files.baseName}_se_file.bam"
     out_bam_coor_sort_se = "${sam_files.baseName}_se_file_coor_sorted.bam"
-    stats_log_se = "${sam_files.baseName}_single_end_stats.log"
+    flagstats_log_se = "${sam_files.baseName}_single_end_stats.log"
+    samtools_stats_log_se = "${sam_files.baseName}_se_stats.txt"
+    tsv_file_with_stats_se = "${sam_files.baseName}_se_SN_stats.tsv"
 
     if (params.PE) {
 
@@ -467,8 +473,15 @@ process samtools_sort {
 
         samtools flagstat \
         "${out_bam_coor_sort}" \
-        > "${stats_log_pe}"
+        > "${flagstats_log_pe}"
 
+        # adding another way to get stats from each bam file
+        samtools stats \
+        "${out_bam_coor_sort}" \
+        > "${samtools_stats_log_pe}"
+
+        # now only putting the stats into a tsv file
+        less "${samtools_stats_log_pe}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats_pe}"
         """
 
 
@@ -534,8 +547,15 @@ process samtools_sort {
 
         samtools flagstat \
         "${out_bam_coor_sort_se}" \
-        > "${stats_log_se}"
+        > "${flagstats_log_se}"
 
+        # adding another way to get stats from each bam file
+        samtools stats \
+        "${out_bam_coor_sort}" \
+        > "${samtools_stats_log_se}"
+
+        # now only putting the stats into a tsv file
+        less "${samtools_stats_log_se}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats_se}"
         """
 
     }
@@ -1060,6 +1080,7 @@ process multiqc_bam_stats {
     input:
 
     path(stats_log_files)
+    path(norm_stats_files)
 
 
     output:
@@ -1307,7 +1328,8 @@ workflow {
             indexed_bams_ch = samtools_sort.out.indexed_bams
             both_bam_index_ch = samtools_sort.out.bam_index_tuple
             flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
-
+            norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
+            tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
             // if you want to filter black list use the param --BL in the command line when calling nextflow
             if ( params.BL ) {
 
@@ -1500,6 +1522,8 @@ workflow {
 
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
             flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+            norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
+            tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
 
             // this will give a blacklist filtered bam but i need to index it again
             bedtools_filt_blacklist(bam_index_tuple_ch, blacklist_ch)
@@ -1575,6 +1599,8 @@ workflow {
             //samtools_sort.out.bam_index_tuple.view()
 
             flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+            norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
+            tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
 
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
 
@@ -1646,7 +1672,7 @@ workflow {
     }
 
     // making a multiqc process for the samtools flagstat log files. this should be able to take the flagstat_log_ch from any part of the choosen paths
-    multiqc_bam_stats(flagstat_log_ch)
+    multiqc_bam_stats(flagstat_log_ch, norm_stats_txt_ch)
 
 
     
@@ -1689,6 +1715,18 @@ workflow {
 
             
         }
+    }
+
+    // I want to make a log file with all the stats from using samtools stats on each bam file
+
+    if (params.PE) {
+
+        //(tsv_SN_stats_ch)
+    }
+    if (params.SE) {
+
+        //py_calc_stats_log(tsv_SN_stats_ch)
+
     }
     
 }

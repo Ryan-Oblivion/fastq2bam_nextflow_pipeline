@@ -7,7 +7,10 @@
 #SBATCH --time=24:00:00
 #SBATCH --job-name=nextflow_chip
 
-source $HOME/.bashrc_rj_test.sh
+#source $HOME/.bashrc_rj_test.sh   # use this it works also but not for others
+
+source /lustre/fs4/home/rjohnson/.bashrc_rj_test.sh
+# source /ru-auth/local/home/rjohnson/.bashrc_rj_test.sh # or use this, should be the same thing 
 
 conda activate nextflow_three
 
@@ -39,8 +42,8 @@ conda activate nextflow_three
 ######################################
 
 # give option for spike in
-# NOTE: for endseq and gloeseq have a branch of the pipeline aligning to the T7 and lamda genome with the same data. Important to know the number of reads and dup rate
-# NOTE:  FOR RICC seq yeast
+# NOTE: for endseq and gloeseq have a branch of the pipeline aligning to the lamda genome(end-seq) and T7 genome(Gloe-seq) with the same data. Important to know the number of reads and dup rate
+# NOTE:  FOR RICC-seq yeast genome
 
 # NOTE: path to the peak files /lustre/fs4/home/ascortea/store/ascortea/beds
      # then get the different peak directories IMR90, k562, BJ subdirectories hold these peak files
@@ -60,6 +63,7 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 -resume \
 --PE \
 --BL \
+--paired_end_reads '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*' \
 --use_effectiveGenomeSize \
 --num_effectiveGenomeSize '2864785220' \
 --calc_break_density
