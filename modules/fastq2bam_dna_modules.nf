@@ -187,3 +187,50 @@ process breakDensityWrapper_process {
 
 
 }
+
+
+
+process py_calc_stats_log {
+
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/python_w_packages_rj'
+
+
+    input:
+    path(tsv_sn_stats)
+
+
+    output:
+
+
+    script:
+
+    name_of_file = "${tsv_sn_stats.baseName}"
+
+    """
+    #!/usr/bin/env python
+
+    import pandas as pd
+
+    list_tsv_files = "${tsv_sn_stats}"
+    list_of_names = "${name_of_files}"
+
+    files_dict_df = {}
+
+    for name, file in zip(list_of_names, list_tsv_files):
+        files_dict_df[name] = pd.read_table(file, index_col = 0, sep='/\t').T
+
+    # making a new df with sample as the column name and the names as rows
+    df_names = pd.DataFrame({'samples': files_dict_df.keys()})
+
+    # concat the dictionary of dataframes
+    combined_stats_df = pd.concat( files_dict_df.values(), axis = 0)
+
+    # now  putting sample names in the df
+    combined_stats_df.insert(0, "sample_names", files_dict_df.keys())
+
+    # writing the tsv
+    combined_stats_df.to_csv("bam_files_log.tsv", sep = '/\t')
+
+    """
+}
+
