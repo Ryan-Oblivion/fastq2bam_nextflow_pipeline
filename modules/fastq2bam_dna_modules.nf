@@ -194,6 +194,10 @@ process py_calc_stats_log {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/python_w_packages_rj'
 
+    if (params.PE) {
+
+        publishDir '.', mode: 'copy', pattern: '*.tsv'
+    }
 
     input:
     path(tsv_sn_stats)
@@ -201,36 +205,71 @@ process py_calc_stats_log {
 
     output:
 
+    path("pe_*.tsv"), emit: pe_tsv_log
+    path("se_*.tsv"), emit: se_tsv_log
+    
+
 
     script:
 
-    name_of_file = "${tsv_sn_stats.baseName}"
+    name_of_file = "${tsv_sn_stats*.baseName.join("")}"
+    pe_log_file_out = "pe_bam_stats_log.tsv"
+    se_log_file_out = "se_bam_stats_log.tsv"
 
-    """
-    #!/usr/bin/env python
+    if (params.PE) {
 
-    import pandas as pd
+    
+        """
+        #!/usr/bin/env python3
 
-    list_tsv_files = "${tsv_sn_stats}"
-    list_of_names = "${name_of_files}"
+        import pandas as pd
 
-    files_dict_df = {}
+        list_tsv_files = "${tsv_sn_stats}".split()
+        list_of_names = "${name_of_file}".split()
 
-    for name, file in zip(list_of_names, list_tsv_files):
-        files_dict_df[name] = pd.read_table(file, index_col = 0, sep='/\t').T
+        files_dict_df = {}
 
-    # making a new df with sample as the column name and the names as rows
-    df_names = pd.DataFrame({'samples': files_dict_df.keys()})
+        for name, file in zip(list_of_names, list_tsv_files):
+            files_dict_df[name] = pd.read_table(file, header=None, sep='\t').set_index(0).T
 
-    # concat the dictionary of dataframes
-    combined_stats_df = pd.concat( files_dict_df.values(), axis = 0)
+        # concat the dictionary of dataframes
+        combined_stats_df = pd.concat( files_dict_df.values(), axis = 0)
 
-    # now  putting sample names in the df
-    combined_stats_df.insert(0, "sample_names", files_dict_df.keys())
+        # now  putting sample names in the df
+        combined_stats_df.insert(0, "sample_names", files_dict_df.keys())
 
-    # writing the tsv
-    combined_stats_df.to_csv("bam_files_log.tsv", sep = '/\t')
+        # writing the tsv
+        combined_stats_df.to_csv("${pe_log_file_out}", sep = '\t')
 
-    """
+        """
+    }
+
+    if (params.SE) {
+
+        """
+        #!/usr/bin/env python3
+
+        import pandas as pd
+
+        list_tsv_files = "${tsv_sn_stats}"
+        list_of_names = "${name_of_file}"
+
+        files_dict_df = {}
+
+        for name, file in zip(list_of_names, list_tsv_files):
+            files_dict_df[name] = pd.read_table(file, header=None, sep='/\t').set_index(0).T
+
+        # concat the dictionary of dataframes
+        combined_stats_df = pd.concat( files_dict_df.values(), axis = 0)
+
+        # now  putting sample names in the df
+        combined_stats_df.insert(0, "sample_names", files_dict_df.keys())
+
+        # writing the tsv
+        combined_stats_df.to_csv("${pe_log_file_out}", sep = '/\t')
+
+        """
+
+    }
 }
 

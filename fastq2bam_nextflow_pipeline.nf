@@ -339,13 +339,17 @@ process samtools_sort {
 
     //conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj' // this was samtools version 1.3 which doesnt have samtools fixmate option -m
 
-    conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools-1.21_spec_env_rj.txt' // that is the explicit file but if that doesnt work try the yml file samtools-1.21_env_rj.yml; and if that doesnt work use the path to the 1.21 environment
+    //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools-1.21_spec_env_rj.txt' // that is the explicit file but if that doesnt work try the yml file samtools-1.21_env_rj.yml; and if that doesnt work use the path to the 1.21 environment
+
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools-1.21_rj'
+
 
     if (params.PE) {
 
         publishDir './results_PE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
         publishDir './results_PE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
         publishDir './results_PE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
+        publishDir './results_PE/stats_tsv_files', mode: 'copy', pattern: '*stats.tsv'
 
     }
 
@@ -354,6 +358,7 @@ process samtools_sort {
         publishDir './results_SE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
         publishDir './results_SE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
         publishDir './results_SE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
+        publishDir './results_SE/stats_tsv_files', mode: 'copy', pattern: '*stats.tsv'
 
     }
     //publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
@@ -1183,6 +1188,8 @@ include {samtools_index_sort} from './modules/fastq2bam_dna_modules.nf'
 
 include {breakDensityWrapper_workflow} from './workflows/breakDensityWrapper_workflow.nf'
 
+include {py_calc_stats_log} from './modules/fastq2bam_dna_modules.nf'
+
 workflow {
 
     // this is the end seq alignment steps first
@@ -1721,11 +1728,11 @@ workflow {
 
     if (params.PE) {
 
-        //(tsv_SN_stats_ch)
+        py_calc_stats_log(tsv_SN_stats_ch)
     }
     if (params.SE) {
 
-        //py_calc_stats_log(tsv_SN_stats_ch)
+        py_calc_stats_log(tsv_SN_stats_ch)
 
     }
     

@@ -1,6 +1,7 @@
 #!/bin/env bash
 
 #SBATCH --mem=40GB
+#SBATCH --partition=hpc_l40_a
 #SBATCH --mail-type=FAIL,END
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
