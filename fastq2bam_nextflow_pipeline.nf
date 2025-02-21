@@ -8,7 +8,7 @@ nextflow.enable.dsl=2
 
 // this is the process for if the adapter sequence is known
 
-
+/*
 process fastp_SE_adapter_known {
     // using this conda yml file that I created. Nextflow will now make its own conda environment from the dependencies found within.
     //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastp_rj_env.yml'
@@ -665,34 +665,8 @@ process deeptools_make_bed {
 
     }
 
-    /*"""
-    ###### Using deeptools parameters ###############
 
-    # first converting the bam file to a bed file using bamCoverage. I can also make a bigwig file if needed, it stores data better but is binary and cannot be opened in text editor
-    # -b or --bam: takes the bam file that will be processed
-    # -o or --outFileName: is the name you want the output file to have
-    # -of or --outFileFormat: is the type of output file you want; either "bigwig" or "bedgraph"
-    # --scaleFactor: the computed scaling factor (or 1, if not applicable) will be multiplied by this.
-    # -bs or --binSize: are the size of the bins in bases, for output of bigwig or bedgraph. default is 50
-    # -p or --numberOfProcessors: this is the number of processers you want to use. Not using this option yet but if needed I will use it.
-    # --normalizeUsing: choose the type of normalization
-    # bamCoverage offers normalization by scaling factor, Reads Per Kilobase per Million mapped reads (RPKM), counts per million (CPM), bins per million mapped reads (BPM) and 1x depth (reads per genome coverage, RPGC).
-    # --effectiveGenomeSize: choose the mappable genome size for your organism of choice used as reference. find length here: https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html
-    # not using effectiveGenomeSize since multiple users will use this pipeline and might not be using the same organism.
-
-    # NOTE: since all the files will be processed using this tool and parameters, they will all be directly comparable in UCSC or IGV without needing to edit track heights.
-    #################################################
-
-    bamCoverage \
-    --bam "${bams}" \
-    --outFileName "${out_bed_name}" \
-    --outFileFormat "bedgraph" \
-    --scaleFactor 1 \
-    --binSize 50 \
-    --normalizeUsing CPM
-
-
-    """*/
+    
 }
 
 process bedtools_filt_blacklist {
@@ -1177,10 +1151,41 @@ process deeptools_aln_shift {
     """
 }
 
-
+*/
 // finally using modules
 
-include {samtools_index_sort} from './modules/fastq2bam_dna_modules.nf'
+
+include {
+    fastp_SE_adapter_known;
+    fastp_SE;
+    fastqc_SE;
+    multiqc_SE;
+    bwa_index_genome;
+    bwa_align_SE;
+    samtools_sort;
+    deeptools_make_bed;
+    bedtools_filt_blacklist;
+    samtools_bl_index;
+    fastp_PE;
+    fastqc_PE;
+    multiqc_PE;
+    bwa_PE_aln;
+    multiqc_bam_stats;
+    deeptools_aln_shift;
+    samtools_index_sort;
+    mk_break_points;
+    breakDensityWrapper_process;
+    py_calc_stats_log;
+
+
+
+
+
+} from './modules/fastq2bam_dna_modules.nf'
+
+
+
+//include {samtools_index_sort} from './modules/fastq2bam_dna_modules.nf'
 
 
 
@@ -1188,7 +1193,9 @@ include {samtools_index_sort} from './modules/fastq2bam_dna_modules.nf'
 
 include {breakDensityWrapper_workflow} from './workflows/breakDensityWrapper_workflow.nf'
 
-include {py_calc_stats_log} from './modules/fastq2bam_dna_modules.nf'
+//include {py_calc_stats_log} from './modules/fastq2bam_dna_modules.nf'
+
+include {spike_in_runs_workflow} from './workflows/spike_in_workflow.nf'
 
 workflow {
 
@@ -1333,7 +1340,7 @@ workflow {
 
             sorted_bams_ch = samtools_sort.out.sorted_bams
             indexed_bams_ch = samtools_sort.out.indexed_bams
-            both_bam_index_ch = samtools_sort.out.bam_index_tuple
+            bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
             flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
             norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
             tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
@@ -1346,20 +1353,20 @@ workflow {
                 
                 //blacklist_ch = Channel.value(params.blacklist_path)
 
-                bedtools_filt_blacklist(both_bam_index_ch, blacklist_ch)
+                bedtools_filt_blacklist(bam_index_tuple_ch, blacklist_ch)
 
                 bl_filt_bams_ch = bedtools_filt_blacklist.out.bl_filtered_bams
                 // i will need to index the black list filtered bam again so i have to create a different samtools process for this
                 samtools_bl_index(bl_filt_bams_ch)
 
-                bl_filt_bam_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
+                bam_index_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
 
-                if ( params.ATAC ) {
+                /*if ( params.ATAC ) {
 
 
                     // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
 
-                    deeptools_aln_shift(bl_filt_bam_tuple_ch)
+                    deeptools_aln_shift(bam_index_tuple_ch)
 
                     atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
                     atac_shift_bam_ch.view()
@@ -1388,22 +1395,23 @@ workflow {
 
                     // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
 
-                    deeptools_make_bed(bl_filt_bam_tuple_ch)
+                    deeptools_make_bed(bam_index_tuple_ch)
 
                     deeptools_make_bed.out.bed_files_normalized.view()
 
                     bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
 
 
-                }
+                }*/
 
                 // then i need to pass the indexed_bl_bam and the bam to the deeptools process
 
-                //deeptools_make_bed(bl_filt_bam_tuple_ch)
+                //deeptools_make_bed(bam_index_tuple_ch)
                 //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
             }
 
+            /*
             else {
 
 
@@ -1412,7 +1420,7 @@ workflow {
 
                     // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
 
-                    deeptools_aln_shift(both_bam_index_ch)
+                    deeptools_aln_shift(bam_index_tuple_ch)
 
                     atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
 
@@ -1440,7 +1448,7 @@ workflow {
 
                     // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
 
-                    deeptools_make_bed(both_bam_index_ch)
+                    deeptools_make_bed(bam_index_tuple_ch)
 
                     deeptools_make_bed.out.bed_files_normalized.view()
 
@@ -1450,11 +1458,12 @@ workflow {
                 }
 
                 // Now i want to pass the tuple that has the bam and its corresponding index file into a process that will create a bigwig file for visulization, created from the bam file. This will show read coverage in the genome without looking for significant areas
-                //deeptools_make_bed(both_bam_index_ch)
+                //deeptools_make_bed(bam_index_tuple_ch)
 
                 //deeptools_make_bed.out.bed_files_normalized.view()
                 //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
-            }
+            }*/
+            
     
 
             // i will either use the bams or the bed files for any future processes depending on what tool needs what.
@@ -1541,16 +1550,16 @@ workflow {
             
             samtools_bl_index(bl_filt_bams_ch) 
 
-            bl_filt_bam_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
+            bam_index_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
 
             // so this would give a bam that is bl filtered and has an index
 
-            if ( params.ATAC ) {
+            /*if ( params.ATAC ) {
 
 
                 // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
 
-                deeptools_aln_shift(bl_filt_bam_tuple_ch)
+                deeptools_aln_shift(bam_index_tuple_ch)
 
                 atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
                 //atac_shift_bam_ch.view()
@@ -1579,19 +1588,19 @@ workflow {
 
                 // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
 
-                deeptools_make_bed(bl_filt_bam_tuple_ch)
+                deeptools_make_bed(bam_index_tuple_ch)
 
                 //deeptools_make_bed.out.bed_files_normalized.view()
 
                 bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
 
 
-            }
+            }*/
             
             
             // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
 
-            //deeptools_make_bed(bl_filt_bam_tuple_ch)
+            //deeptools_make_bed(bam_index_tuple_ch)
 
             //deeptools_make_bed.out.bed_files_normalized.view()
 
@@ -1613,7 +1622,76 @@ workflow {
 
             // add the if logic for ATAC here
 
-            if (params.ATAC) {
+            /*if (params.ATAC) {
+
+
+                // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
+
+                deeptools_aln_shift(bam_index_tuple_ch)
+
+                atac_shift_bam_ch = deeptools_aln_shift.out.atac_shifted_bam
+
+                // now i have to re index this new atac shifted bam. dispite the name of the process I can just pass any future created bam to this channel to be indexed
+
+                samtools_index_sort(atac_shift_bam_ch)
+
+                // so now name the tuple channel output appropriately 
+                atac_shift_bam_index_ch = samtools_index_sort.out.bl_filt_bam_index_tuple
+
+                // now making the bed files for atac seq
+
+                deeptools_make_bed(atac_shift_bam_index_ch)
+
+                //deeptools_make_bed.out.bed_files_normalized.view()
+
+                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+
+
+
+            }
+            else {
+
+
+
+                // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
+
+                deeptools_make_bed(bam_index_tuple_ch)
+
+                //deeptools_make_bed.out.bed_files_normalized.view()
+
+                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
+
+
+            }*/
+
+
+
+
+
+
+            // just using the original sorted and indexed bam
+            
+            // i will comment this out below since it was the original but the above if logic should work if there is ATAC data or if there is not
+
+            //deeptools_make_bed(bam_index_tuple_ch)
+
+            //deeptools_make_bed.out.bed_files_normalized.view()
+
+            //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+
+
+        }
+
+        
+
+ 
+    }
+
+
+
+    // I think i can just put the if ATAC script here separately and just grab all of the bam tuple channels
+
+    if (params.ATAC) {
 
 
                 // now if there is atac-seq data I need to take the bam and shift the alignment. I will do this using deeptools alignmentSieve in both pair end vs single end and bl vs no bl filter
@@ -1656,28 +1734,6 @@ workflow {
             }
 
 
-
-
-
-
-            // just using the original sorted and indexed bam
-            
-            // i will comment this out below since it was the original but the above if logic should work if there is ATAC data or if there is not
-
-            //deeptools_make_bed(bam_index_tuple_ch)
-
-            //deeptools_make_bed.out.bed_files_normalized.view()
-
-            //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
-
-
-        }
-
-        
-
- 
-    }
-
     // making a multiqc process for the samtools flagstat log files. this should be able to take the flagstat_log_ch from any part of the choosen paths
     multiqc_bam_stats(flagstat_log_ch, norm_stats_txt_ch)
 
@@ -1693,34 +1749,15 @@ workflow {
     // i want to call the workflow breakDensityWrapper_workflow and pass the bam_index_tuple_ch as an input from either path where the user chose to do blacklist filter or not. Then also pass the peak files that already exists or are created later as input
     
         if (params.PE) {
-
-            if (params.BL) {
-
-                breakDensityWrapper_workflow(bl_filt_bam_tuple_ch, peak_files_ch)
-
-            }
-            else {
-                breakDensityWrapper_workflow(bam_index_tuple_ch, peak_files_ch)
-
-            }
             
+            breakDensityWrapper_workflow(bam_index_tuple_ch, peak_files_ch)
 
         }
 
         if (params.SE) {
-
-            if (params.BL) {
-
-                breakDensityWrapper_workflow(bl_filt_bam_tuple_ch, peak_files_ch)
-
-            }
-            else {
-
-                breakDensityWrapper_workflow(both_bam_index_ch, peak_files_ch)
-
-            }
-
-            
+         
+            breakDensityWrapper_workflow(bam_index_tuple_ch, peak_files_ch)
+  
         }
     }
 
@@ -1728,11 +1765,26 @@ workflow {
 
     if (params.PE) {
 
-        py_calc_stats_log(tsv_SN_stats_ch)
+        //py_calc_stats_log(tsv_SN_stats_ch)
     }
     if (params.SE) {
 
-        py_calc_stats_log(tsv_SN_stats_ch)
+        //py_calc_stats_log(tsv_SN_stats_ch)
+
+    }
+
+    
+    // looking to run the spike_in workflow
+    
+
+    if (params.spike_in) {
+
+        // all this is doing is running the normal fastq2bam2 pipeline but with the specified genomes for spike in
+        spike_in_runs_workflow()
+
+        // not sure if i would need to make this channel the normal 'bam_index_tuple_ch', or do what i did with atac-seq and give it a unique name calling it 'spike_in_bam_index_ch'
+        // since spike in can occur at the same time as either pe or se, i need to give this channel a unique name. I dont think spike in bam files need to have break density calculated
+        spike_in_bam_index_ch = spike_in_runs_workflow.out.bam_index_tuple_ch
 
     }
     

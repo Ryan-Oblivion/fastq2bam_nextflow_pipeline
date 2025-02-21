@@ -1,7 +1,7 @@
 #!/bin/env bash
 
 #SBATCH --mem=40GB
-#SBATCH --partition=hpc_l40_a
+#SBATCH --partition=hpc_a10_a
 #SBATCH --mail-type=FAIL,END
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
@@ -42,10 +42,18 @@ conda activate nextflow_three
 
 ######################################
 
+################# parameters for spike in ##################################
 # give option for spike in
 # NOTE: for endseq and gloeseq have a branch of the pipeline aligning to the lamda genome(end-seq) and T7 genome(Gloe-seq) with the same data. Important to know the number of reads and dup rate
 # NOTE:  FOR RICC-seq yeast genome
 
+# --spike_in : lets the pipeline know it should run the workflow for spike ins
+# --end_seq : the pipeline will run the single end path since end_seq uses single end reads 
+# --gloe_seq : pipeline will run the pair end path since gloe_seq uses pair end reads, it will use the t7 genome file. (since gloe_seq uses pair end reads, you shouldn't be using the gloe_seq parameter with the single end parameters)
+# --ricc_seq : not sure what type of experiment ricc seq is
+
+
+#####################################################
 # NOTE: path to the peak files /lustre/fs4/home/ascortea/store/ascortea/beds
      # then get the different peak directories IMR90, k562, BJ subdirectories hold these peak files
 
@@ -67,7 +75,9 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 --paired_end_reads '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*' \
 --use_effectiveGenomeSize \
 --num_effectiveGenomeSize '2864785220' \
---calc_break_density
+--calc_break_density \
+--spike_in \
+--gloe_seq
 
 #--ATAC
 
