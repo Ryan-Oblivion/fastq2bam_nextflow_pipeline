@@ -1,22 +1,15 @@
-// first i will activate dsl2
-nextflow.enable.dsl=2
 
-// NOTE: i would prefer if we could just keep all the reads in one directory and just use glob pattern to grab what we want
+process fastp_SE_adapter_known_spike_in {
 
-// first process is to download genomes that will be used or just get the path to the genome
-//process download_genomes{}
+    label 'spike_in_small_resources'
 
-// this is the process for if the adapter sequence is known
-
-
-process fastp_SE_adapter_known {
     // using this conda yml file that I created. Nextflow will now make its own conda environment from the dependencies found within.
     //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastp_rj_env.yml'
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './fastp_qc_single_end', mode: 'copy', pattern:'*_fp_filt.fastq'
-    publishDir './fastp_qc_single_end/html_reports', mode: 'copy', pattern:'*.html'
+    publishDir './results_SE/fastp_qc_single_end/spike_in', mode: 'copy', pattern:'*_fp_filt.fastq'
+    publishDir './results_SE/fastp_qc_single_end/html_reports/spike_in', mode: 'copy', pattern:'*.html'
 
     input:
     // input names dont have to be the exact same as what is seen in the workflow section of this script
@@ -89,14 +82,17 @@ process fastp_SE_adapter_known {
 
 
 // This next process will run some qc to look at the fastq files and trim adapters from the single end reads
-process fastp_SE {
+process fastp_SE_spike_in {
+
+    label 'spike_in_small_resources'
+
     // using this conda yml file that I created. Nextflow will now make its own conda environment from the dependencies found within.
     //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastp_rj_env.yml'
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './fastp_qc_single_end', mode: 'copy', pattern:'*_fp_filt.fastq'
-    publishDir './fastp_qc_single_end/html_reports', mode: 'copy', pattern:'*.html'
+    publishDir './results_SE/fastp_qc_single_end/spike_in', mode: 'copy', pattern:'*_fp_filt.fastq'
+    publishDir './results_SE/fastp_qc_single_end/html_reports/spike_in', mode: 'copy', pattern:'*.html'
 
     input:
     // input names dont have to be the exact same as what is seen in the workflow section of this script
@@ -163,10 +159,13 @@ process fastp_SE {
 
 // this next process is for fastqc tool
 // dont forget about multiqc m
-process fastqc_SE {
+process fastqc_SE_spike_in {
+
+    label 'spike_in_small_resources'
+
     // using the conda environment 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
-    publishDir './fastqc_htmls', mode: 'copy', pattern: '*.html'
+    publishDir './results_SE/fastqc_htmls/spike_in', mode: 'copy', pattern: '*.html'
 
 
     input:
@@ -195,13 +194,16 @@ process fastqc_SE {
     """
 }
 
-process multiqc_SE {
+process multiqc_SE_spike_in {
+
+    label 'spike_in_small_resources'
+    
     // this yml file doesnt work
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
 
     //conda '/ru-auth/local/home/rjohnson/miniconda3/envs/multiqc_rj'
     
-    publishDir './multiQC_collection', mode: 'copy', pattern: '*.html'
+    publishDir './results_SE/multiQC_collection/spike_in', mode: 'copy', pattern: '*.html'
 
     input:
     path(fastp_filt_html)
@@ -234,10 +236,29 @@ process multiqc_SE {
 
 // Creating two processes that will index the reference genome
 
-process bwa_index_genome {
+
+
+process bwa_index_genome_spike_in {
+
+    label 'spike_in_big_resoruces'
+
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
-    publishDir './genome_index_bwa', mode: 'copy', pattern: '*'
+    if (params.gloe_seq) {
+
+        publishDir './genome_index_bwa/spike_in/t7_genome_index', mode: 'copy', pattern: '*'
+
+    }
+    else if (params.end_seq) {
+
+        publishDir './genome_index_bwa/spike_in/lambda_genome_index', mode: 'copy', pattern: '*'
+    }
+    else if (params.ricc_seq) {
+
+        publishDir './genome_index_bwa/spike_in/yeast_genome_index', mode: 'copy', pattern: '*'
+    }
+    
+
 
     input:
     path(ref_genome)
@@ -275,12 +296,30 @@ process bwa_index_genome {
 
 // creating a process that will align the reads to the genome. i will take in the reference genome, the index files, the filtered fastq's and their names
 
-process bwa_align_SE {
+process bwa_align_SE_spike_in {
+
+    label 'spike_in_big_resoruces'
+
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
-    publishDir './bwa_outputs_singleEnd_SAM', mode: 'copy', pattern: '*.sam'
-    publishDir './sai_alignment_files', mode: 'copy', pattern: '*.sai'
+    //publishDir './results_SE/bwa_outputs_singleEnd_SAM/spike_in', mode: 'copy', pattern: '*.sam'
+    //publishDir './results_SE/sai_alignment_files/spike_in', mode: 'copy', pattern: '*.sai'
 
+    if (params.gloe_seq) {
+
+        publishDir './results_SE/bwa_outputs_singleEnd_SAM/spike_in/t7_sam', mode: 'copy', pattern: '*.sam'
+        publishDir './results_SE/sai_alignment_files/spike_in/t7_sai', mode: 'copy', pattern: '*.sai'
+    }
+    else if (params.end_seq) {
+
+        publishDir './results_SE/bwa_outputs_singleEnd_SAM/spike_in/lambda_sam', mode: 'copy', pattern: '*.sam'
+        publishDir './results_SE/sai_alignment_files/spike_in/lambda_sai', mode: 'copy', pattern: '*.sai'
+    }
+    else if (params.ricc_seq) {
+
+        publishDir './results_SE/bwa_outputs_singleEnd_SAM/spike_in/yeast_sam', mode: 'copy', pattern: '*.sam'
+        publishDir './results_SE/sai_alignment_files/spike_in/yeast_sai', mode: 'copy', pattern: '*.sai'
+    }
 
     input:
     path(ref_genome)
@@ -332,29 +371,62 @@ process bwa_align_SE {
     """
 }
 
-process samtools_sort {
+
+
+
+process samtools_sort_spike_in {
+
+    label 'spike_in_small_resources'
     // using the conda yml file for samtools
     // it doesnt work
     //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools_rj_env.yml'
 
     //conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj' // this was samtools version 1.3 which doesnt have samtools fixmate option -m
 
-    conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools-1.21_spec_env_rj.txt' // that is the explicit file but if that doesnt work try the yml file samtools-1.21_env_rj.yml; and if that doesnt work use the path to the 1.21 environment
+    //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools-1.21_spec_env_rj.txt' // that is the explicit file but if that doesnt work try the yml file samtools-1.21_env_rj.yml; and if that doesnt work use the path to the 1.21 environment
 
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools-1.21_rj'
+
+
+    // Determine the base directory (PE/SE) first
     if (params.PE) {
+        // Handle PE with spike-ins
+        if (params.gloe_seq) {
+            publishDir './results_PE/sorted_bam_files/spike_in_t7_phage', mode: 'copy', pattern: '*_sorted.bam'
+            publishDir './results_PE/indexed_bam_files/spike_in_t7_phage', mode: 'copy', pattern: '*.{bai, csi}'
+            publishDir './results_PE/flag_stat_log/spike_in_t7_phage', mode: 'copy', pattern: '*stats.log'
+            publishDir './results_PE/stats_tsv_files/spike_in_t7_phage', mode: 'copy', pattern: '*stats.tsv'
+        } else if (params.end_seq) {
+            publishDir './results_PE/sorted_bam_files/spike_in_lambda', mode: 'copy', pattern: '*_sorted.bam'
+            publishDir './results_PE/indexed_bam_files/spike_in_lambda', mode: 'copy', pattern: '*.{bai, csi}'
+            publishDir './results_PE/flag_stat_log/spike_in_lambda', mode: 'copy', pattern: '*stats.log'
+            publishDir './results_PE/stats_tsv_files/spike_in_lambda', mode: 'copy', pattern: '*stats.tsv'
+        } else if (params.ricc_seq) {
+            publishDir './results_PE/sorted_bam_files/spike_in_yeast', mode: 'copy', pattern: '*_sorted.bam'
+            publishDir './results_PE/indexed_bam_files/spike_in_yeast', mode: 'copy', pattern: '*.{bai, csi}'
+            publishDir './results_PE/flag_stat_log/spike_in_yeast', mode: 'copy', pattern: '*stats.log'
+            publishDir './results_PE/stats_tsv_files/spike_in_yeast', mode: 'copy', pattern: '*stats.tsv'
+        } 
+    } 
+    else if (params.SE) {
 
-        publishDir './results_PE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './results_PE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
-        publishDir './results_PE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
-
-    }
-
-    else if(params.SE) {
-
-        publishDir './resluts_SE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './resluts_SE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
-        publishDir './resluts_SE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
-
+        // Handle SE with spike-ins
+        if (params.gloe_seq) {
+            publishDir './results_SE/sorted_bam_files/spike_in_t7_phage', mode: 'copy', pattern: '*_sorted.bam'
+            publishDir './results_SE/indexed_bam_files/spike_in_t7_phage', mode: 'copy', pattern: '*.{bai, csi}'
+            publishDir './results_SE/flag_stat_log/spike_in_t7_phage', mode: 'copy', pattern: '*stats.log'
+            publishDir './results_SE/stats_tsv_files/spike_in_t7_phage', mode: 'copy', pattern: '*stats.tsv'
+        } else if (params.end_seq) {
+            publishDir './results_SE/sorted_bam_files/spike_in_lambda', mode: 'copy', pattern: '*_sorted.bam'
+            publishDir './results_SE/indexed_bam_files/spike_in_lambda', mode: 'copy', pattern: '*.{bai, csi}'
+            publishDir './results_SE/flag_stat_log/spike_in_lambda', mode: 'copy', pattern: '*stats.log'
+            publishDir './results_SE/stats_tsv_files/spike_in_lambda', mode: 'copy', pattern: '*stats.tsv'
+        } else if (params.ricc_seq) {
+            publishDir './results_SE/sorted_bam_files/spike_in_yeast', mode: 'copy', pattern: '*_sorted.bam'
+            publishDir './results_SE/indexed_bam_files/spike_in_yeast', mode: 'copy', pattern: '*.{bai, csi}'
+            publishDir './results_SE/flag_stat_log/spike_in_yeast', mode: 'copy', pattern: '*stats.log'
+            publishDir './results_SE/stats_tsv_files/spike_in_yeast', mode: 'copy', pattern: '*stats.tsv'
+        } 
     }
     //publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
     //publishDir './indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
@@ -373,6 +445,8 @@ process samtools_sort {
     tuple path("*_sorted.bam"), path("*.bai"), emit: bam_index_tuple
 
     path("*stats.log"), emit: flag_stats_log
+    path("*stats.txt"), emit: norm_stats_txt
+    path("*stats.tsv"), emit: tsv_SN_stats
 
     script:
 
@@ -382,168 +456,114 @@ process samtools_sort {
     out_bam_coor_sort = "${sam_files.baseName}_filt_coor_sorted.bam"
     out_bam_fixmate = "${sam_files.baseName}_fixmate.bam"
     out_bam_final = "${sam_files.baseName}_markdup_filt_coor_sorted.bam"
-    stats_log_pe = "${sam_files.baseName}_pair_end_stats.log"
-
-    out_bam_se_filt = "${sam_files.baseName}_se_file.bam"
-    out_bam_coor_sort_se = "${sam_files.baseName}_se_file_coor_sorted.bam"
-    stats_log_se = "${sam_files.baseName}_single_end_stats.log"
-
-    if (params.PE) {
-
-        """
-        #!/usr/bin/env bash
-
-        ################# samtools parameters used ################
-        # for samtools view
-        # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
-        # --bam or -b : output in the bam format
-        # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
-
-        # for samtools sort
-        # -o : takes a file. it writes the final sorted output to file rather than standard output
-        # -O : write the final output as sam, bam, or cram
-
-        # samtools fixmate : preparing for finding the duplicates
-        # -O : specify the format and i choose bam
-        # -m : add ms(mate score) tags. these are used by markdup to select the best reads to keep 
-        # other possible option to look at is -r : remove secondary and unmapped reads ?
-        
-        # for samtools markdup : can only be done on coordinate sorted bam files and run it through samtools fixmate first
-        # -r : remove duplicate reads
-        # --mode or -m : duplicate decision method for paired reads. values are "t" or "s". read documentation but i choose s becasue it tends to return more results. just incase i will remove this option in the pair end mode by adding an if else statement in this process.
-
-        # now for samtools index to get index files
-        # -b, --bai: create a bai index; this version of samtools does not support --bai --csi just use -b -c
-        # -c, --csi: create a csi index
-        # -o, --output: write the output index to a file specified  only when one alignment file is being indexed
-
-        # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
-        # no parameters needed. just need to give the final bam file that went through all the processing
-        ###########################################################
-
-        # I should add a samtools filtering. looking to only get mapq scores higher than 30
-
-        samtools view \
-        -q 30 \
-        -b \
-        "${sam_files}" \
-        > "${out_bam_filt}" 
-        
-        
-        # first i have to name sort to use fixmate
-        samtools sort \
-        -o "${out_bam_name_sort}" \
-        -n \
-        -O bam \
-        "${out_bam_filt}"
+    flagstats_log = "${sam_files.baseName}_flag_stats.log"
+    samtools_stats_log = "${sam_files.baseName}_stats.txt"
+    tsv_file_with_stats = "${sam_files.baseName}_SN_stats.tsv"
 
 
-        samtools fixmate \
-        -O bam \
-        -m \
-        "${out_bam_name_sort}"\
-        "${out_bam_fixmate}"
+    
+
+    """
+    #!/usr/bin/env bash
+
+    ################# samtools parameters used ################
+    # for samtools view
+    # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
+    # --bam or -b : output in the bam format
+    # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
+
+    # for samtools sort
+    # -o : takes a file. it writes the final sorted output to file rather than standard output
+    # -O : write the final output as sam, bam, or cram
+
+    # samtools fixmate : preparing for finding the duplicates
+    # -O : specify the format and i choose bam
+    # -m : add ms(mate score) tags. these are used by markdup to select the best reads to keep 
+    # other possible option to look at is -r : remove secondary and unmapped reads ?
+    
+    # for samtools markdup : can only be done on coordinate sorted bam files and run it through samtools fixmate first
+    # -r : remove duplicate reads
+    # --mode or -m : duplicate decision method for paired reads. values are "t" or "s". read documentation but i choose s becasue it tends to return more results. just incase i will remove this option in the pair end mode by adding an if else statement in this process.
+
+    # now for samtools index to get index files
+    # -b, --bai: create a bai index; this version of samtools does not support --bai --csi just use -b -c
+    # -c, --csi: create a csi index
+    # -o, --output: write the output index to a file specified  only when one alignment file is being indexed
+
+    # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
+    # no parameters needed. just need to give the final bam file that went through all the processing
+    ###########################################################
+
+    # I should add a samtools filtering. looking to only get mapq scores higher than 30
+
+    samtools view \
+    -q 30 \
+    -b \
+    "${sam_files}" \
+    > "${out_bam_filt}" 
+    
+    
+    # first i have to name sort to use fixmate
+    samtools sort \
+    -o "${out_bam_name_sort}" \
+    -n \
+    -O bam \
+    "${out_bam_filt}"
 
 
-        # now i will coordinate sort here 
-        samtools sort \
-        -o "${out_bam_coor_sort}" \
-        -O bam \
-        "${out_bam_fixmate}"
+    samtools fixmate \
+    -O bam \
+    -m \
+    "${out_bam_name_sort}"\
+    "${out_bam_fixmate}"
 
 
-        # i might need to put coordinate sorted bam into markdup
-        # this works but removing the duplicates results in the file being very small meaning too many reads were removed that were considered duplicates.
-        # this results in the next process deeptools not being able to create a normalized bedgraph file
-
-        #samtools markdup \
-        #"\${out_bam_coor_sort}" \
-        #"\${out_bam_final}"
-
-        # so i will just use the out file from the coordinate sort samtools sort section instead of using out_bam_final
-        samtools index \
-        -b \
-        "${out_bam_coor_sort}"
-
-        samtools flagstat \
-        "${out_bam_coor_sort}" \
-        > "${stats_log_pe}"
-
-        """
+    # now i will coordinate sort here 
+    samtools sort \
+    -o "${out_bam_coor_sort}" \
+    -O bam \
+    "${out_bam_fixmate}"
 
 
+    # i might need to put coordinate sorted bam into markdup
+    # this works but removing the duplicates results in the file being very small meaning too many reads were removed that were considered duplicates.
+    # this results in the next process deeptools not being able to create a normalized bedgraph file
 
-    }
-    else if (params.SE) {
+    #samtools markdup \
+    #"\${out_bam_coor_sort}" \
+    #"\${out_bam_final}"
 
-        """
-        #!/usr/bin/env bash
+    # so i will just use the out file from the coordinate sort samtools sort section instead of using out_bam_final
+    samtools index \
+    -b \
+    "${out_bam_coor_sort}"
 
-        ################# samtools parameters used ################
-        # for samtools view
-        # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
-        # --bam or -b : output in the bam format
-        # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
+    samtools flagstat \
+    "${out_bam_coor_sort}" \
+    > "${flagstats_log}"
 
-        # for samtools sort
-        # -o : takes a file. it writes the final sorted output to file rather than standard output
-        # -O : write the final output as sam, bam, or cram
+    # adding another way to get stats from each bam file
+    samtools stats \
+    "${out_bam_coor_sort}" \
+    > "${samtools_stats_log}"
 
-        # samtools fixmate : preparing for finding the duplicates
-        # -O : specify the format and i choose bam
-        # -m : add ms(mate score) tags. these are used by markdup to select the best reads to keep 
-        # other possible option to look at is -r : remove secondary and unmapped reads ?
-        
-        # for samtools markdup : can only be done on coordinate sorted bam files and run it through samtools fixmate first
-        # -r : remove duplicate reads
-        # --mode or -m : duplicate decision method for paired reads. values are "t" or "s". read documentation but i choose s becasue it tends to return more results. just incase i will remove this option in the pair end mode by adding an if else statement in this process.
-
-        # now for samtools index to get index files
-        # -b, --bai: create a bai index; this version of samtools does not support --bai --csi just use -b -c
-        # -c, --csi: create a csi index
-        # -o, --output: write the output index to a file specified  only when one alignment file is being indexed
-
-        # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
-        # no parameters needed. just need to give the final bam file that went through all the processing
-
-
-        ###########################################################
-
-        # I should add a samtools filtering. looking to only get mapq scores higher than 30
-
-        samtools view \
-        -q 30 \
-        -b \
-        "${sam_files}" \
-        > "${out_bam_se_filt}" 
-        
+    # now only putting the stats into a tsv file
+    less "${samtools_stats_log}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats}"
+    """
 
 
 
-        # now i will coordinate sort here 
-        samtools sort \
-        -o "${out_bam_coor_sort_se}" \
-        -O bam \
-        "${out_bam_se_filt}"
 
-
-        # so i will just use the out file from the coordinate sort samtools sort section instead of using out_bam_final
-        samtools index \
-        -b \
-        "${out_bam_coor_sort_se}"
-
-        samtools flagstat \
-        "${out_bam_coor_sort_se}" \
-        > "${stats_log_se}"
-
-        """
-
-    }
 
     
 }
 
-process deeptools_make_bed {
+
+
+process deeptools_make_bed_spike_in {
+    
+    label 'spike_in_small_resources'
+
     // this conda env yml file didnt work. have to use the actual env
     //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/deeptools_rj_env.yml'
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/deeptools_rj'
@@ -554,11 +574,11 @@ process deeptools_make_bed {
 
         if (params.BL) {
 
-            publishDir './results_PE/bl_filt_bed/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
+            publishDir './results_PE/bl_filt_bed/bed_graphs_deeptools/spike_in', mode: 'copy', pattern: '*'
 
         }
         else {
-            publishDir './results_PE/no_bl_filt/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
+            publishDir './results_PE/no_bl_filt/bed_graphs_deeptools/spike_in', mode: 'copy', pattern: '*'
         }
     
     }
@@ -566,11 +586,11 @@ process deeptools_make_bed {
 
         if (params.BL) {
 
-            publishDir './results_SE/bl_filt_bed/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
+            publishDir './results_SE/bl_filt_bed/bed_graphs_deeptools/spike_in', mode: 'copy', pattern: '*'
 
         }
         else {
-            publishDir './results_SE/no_bl_filt/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
+            publishDir './results_SE/no_bl_filt/bed_graphs_deeptools/spike_in', mode: 'copy', pattern: '*'
         }
     }
 
@@ -587,8 +607,60 @@ process deeptools_make_bed {
 
     out_bed_name="${bams.baseName}_normalized_cpm.bed"
 
+    if (params.use_effectiveGenomeSize) {
 
-    """
+        """
+
+        ###### Using deeptools parameters ###############
+
+        # first converting the bam file to a bed file using bamCoverage. I can also make a bigwig file if needed, it stores data better but is binary and cannot be opened in text editor
+        # -b or --bam: takes the bam file that will be processed
+        # -o or --outFileName: is the name you want the output file to have
+        # -of or --outFileFormat: is the type of output file you want; either "bigwig" or "bedgraph"
+        # --scaleFactor: the computed scaling factor (or 1, if not applicable) will be multiplied by this.
+        # -bs or --binSize: are the size of the bins in bases, for output of bigwig or bedgraph. default is 50
+        # -p or --numberOfProcessors: this is the number of processers you want to use. Not using this option yet but if needed I will use it.
+        # --normalizeUsing: choose the type of normalization
+        # bamCoverage offers normalization by scaling factor, Reads Per Kilobase per Million mapped reads (RPKM), counts per million (CPM), bins per million mapped reads (BPM) and 1x depth (reads per genome coverage, RPGC).
+        # --effectiveGenomeSize: choose the mappable genome size for your organism of choice used as reference. find length here: https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html
+        # not using effectiveGenomeSize since multiple users will use this pipeline and might not be using the same organism.
+        # actually i decided to use effectiveGenomeSize afterall since i can split this process into using it or not.
+
+        # NOTE: since all the files will be processed using this tool and parameters, they will all be directly comparable in UCSC or IGV without needing to edit track heights.
+        #################################################
+
+
+        bamCoverage \
+        --bam "${bams}" \
+        --outFileName "${out_bed_name}" \
+        --outFileFormat "bedgraph" \
+        --scaleFactor 1 \
+        --binSize 50 \
+        --normalizeUsing CPM \
+        --effectiveGenomeSize "${params.num_effectiveGenomeSize}"
+
+
+        """
+
+
+    }
+    else {
+
+        """
+
+        bamCoverage \
+        --bam "${bams}" \
+        --outFileName "${out_bed_name}" \
+        --outFileFormat "bedgraph" \
+        --scaleFactor 1 \
+        --binSize 50 \
+        --normalizeUsing CPM
+
+        """
+
+    }
+
+    /*"""
     ###### Using deeptools parameters ###############
 
     # first converting the bam file to a bed file using bamCoverage. I can also make a bigwig file if needed, it stores data better but is binary and cannot be opened in text editor
@@ -615,10 +687,12 @@ process deeptools_make_bed {
     --normalizeUsing CPM
 
 
-    """
+    """*/
 }
 
-process bedtools_filt_blacklist {
+// not doing black list filter for spike in
+/*
+process bedtools_filt_blacklist_spike_in {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/bedtools_rj'
 
@@ -663,20 +737,47 @@ process bedtools_filt_blacklist {
 
     """
 
-}
+}*/
 
-process samtools_bl_index {
+/*
+process samtools_bl_index_spike_in {
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj'
+
+    
 
     //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
     if (params.PE) {
 
-        publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+        if (params.ATAC) {
+
+            publishDir './results_PE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_PE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+
+        }
+        else {
+
+            publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+        }
+
+       
     
     }
     else {
 
-        publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'    
+        if (params.ATAC) {
+
+            publishDir './results_SE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_SE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+
+        }
+        else {
+
+            publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+        }
+
+          
     }
 
     input:
@@ -685,11 +786,12 @@ process samtools_bl_index {
 
     output:
 
-    tuple path("${bl_filt_bam}"), path("*.bai"), emit: bl_filt_bam_index_tuple
+    tuple path("${out_bam_name_sort}"), path("*.bai"), emit: bl_filt_bam_index_tuple
 
 
     script:
     
+    out_bam_name_sort = "${bl_filt_bam.baseName}_sort2.bam"
 
     """
     ####### parameters for indexing bam ######
@@ -697,24 +799,35 @@ process samtools_bl_index {
 
     ##########################################
 
+    # just do some sorting 
+
+    samtools sort \
+    -o "${out_bam_name_sort}" \
+    -O bam \
+    "${bl_filt_bam}"
+
+
+
     samtools index \
     -b \
-    "${bl_filt_bam}" 
+    "${out_bam_name_sort}" 
 
     """
-}
+}*/
 
-process fastp_PE {
+process fastp_PE_spike_in {
+
+    label 'spike_in_small_resources'
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './fastp_pe_results/filt_fastqs', mode: 'copy', pattern: '*_filt_{R1,R2}*'
+    publishDir './results_PE/fastp_pe_results/filt_fastqs/spike_in', mode: 'copy', pattern: '*_filt_{R1,R2}*'
 
-    publishDir './fastp_pe_results/merged_filt_fastqs', mode: 'copy', pattern: '*_merged*'
+    publishDir './results_PE/fastp_pe_results/merged_filt_fastqs/spike_in', mode: 'copy', pattern: '*_merged*'
 
-    publishDir './fastp_pe_results/failed_qc_reads', mode: 'copy', pattern: '*_failed_filter*'
+    publishDir './results_PE/fastp_pe_results/failed_qc_reads/spike_in', mode: 'copy', pattern: '*_failed_filter*'
 
-    publishDir './fastp_pe_results/htmls', mode: 'copy', pattern: '*fastp.html'
+    publishDir './results_PE/fastp_pe_results/htmls/spike_in', mode: 'copy', pattern: '*fastp.html'
 
 
     input:
@@ -800,11 +913,13 @@ process fastp_PE {
 
 }
 
-process fastqc_PE {
+process fastqc_PE_spike_in {
+
+    label 'spike_in_small_resources'
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
 
-    publishDir './fastqc_pe_files', mode: 'copy', pattern: '*'
+    publishDir './results_PE/fastqc_pe_files/spike_in', mode: 'copy', pattern: '*'
 
     input:
    
@@ -844,11 +959,13 @@ process fastqc_PE {
 }
 
 
-process multiqc_PE {
+process multiqc_PE_spike_in {
+
+    label 'spike_in_small_resources'
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
 
-    publishDir './multiqc_PE_output', mode: 'copy', pattern: '*'
+    publishDir './results_PE/multiqc_PE_output/spike_in', mode: 'copy', pattern: '*'
 
 
     input:
@@ -888,14 +1005,32 @@ process multiqc_PE {
     """
 }
 
-process bwa_PE_aln {
+process bwa_PE_aln_spike_in {
+
+    label 'spike_in_small_resources'
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
-    publishDir './pe_bwa_files/pe_sam_files', mode: 'copy', pattern: '*.sam'
-    publishDir './pe_bwa_files/pe_sai_index_files', mode: 'copy', pattern: '*.sai'
+    //publishDir './results_PE/pe_bwa_files/pe_sam_files/spike_in', mode: 'copy', pattern: '*.sam'
+    //publishDir './results_PE/pe_bwa_files/pe_sai_index_files/spike_in', mode: 'copy', pattern: '*.sai'
     //cache false 
 
+    if (params.gloe_seq) {
+
+        publishDir './results_PE/pe_bwa_files/pe_sam_files/spike_in/t7_sam', mode: 'copy', pattern: '*.sam'
+        publishDir './results_PE/pe_bwa_files/pe_sai_index_files/spike_in/t7_sai', mode: 'copy', pattern: '*.sai'
+
+    }
+    else if (params.end_seq) {
+
+        publishDir './results_PE/pe_bwa_files/pe_sam_files/spike_in/lambda_sam', mode: 'copy', pattern: '*.sam'
+        publishDir './results_PE/pe_bwa_files/pe_sai_index_files/spike_in/lambda_sai', mode: 'copy', pattern: '*.sai'
+    }
+    else if (params.ricc_seq) {
+
+        publishDir './results_PE/pe_bwa_files/pe_sam_files/spike_in/yeast_sam', mode: 'copy', pattern: '*.sam'
+        publishDir './results_PE/pe_bwa_files/pe_sai_index_files/spike_in/yeast_sai', mode: 'copy', pattern: '*.sai'
+    }
 
     input:
     tuple val(filt_fastq_name), path(fastq_r1), path(fastq_r2)
@@ -955,7 +1090,8 @@ process bwa_PE_aln {
     """
 }
 
-process multiqc_bam_stats {
+/*
+process multiqc_bam_stats_spike_in {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
 
@@ -972,6 +1108,7 @@ process multiqc_bam_stats {
     input:
 
     path(stats_log_files)
+    path(norm_stats_files)
 
 
     output:
@@ -1015,309 +1152,52 @@ process multiqc_bam_stats {
 
     }
     
-}
+}*/
 
-workflow {
+/*
+process deeptools_aln_shift_spike_in {
 
-    // this is the end seq alignment steps first
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/deeptools_rj'
 
+    if (params.PE) {
 
-    // i will use a path already in the hpc as the defualt human genome but the user can change the genome by using -genome parameter and putting the path to a new genome in the command line when calling nextflow run
-    params.genome = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/genome/Sequence/Bowtie2Index/genome.fa')
+        publishDir './results_PE/atac_shift_bam', mode: 'copy', pattern: '*shift.bam'
+    }
+    else {
 
-    // putting the human genome in a channel
-    // keeping the human genome in a value channel so i can have other processes run more than once.
-    genome_ch = Channel.value(params.genome)
-
-    params.blacklist_path = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/blacklist/hg19-blacklist.v2.bed')
-                
-    blacklist_ch = Channel.value(params.blacklist_path)
-
-    // i want to add an if then logic to the pipeline so i know which type of reads are comming in paired end or single end
-
-    //if ( params.PE )
-         // lets get the channel for the reads first
-
-      //   fastp_PE()
-         
-         //align_PE_reads(genome_ch)
-    
-    
-    
-    
-    if ( params.SE ) {
-
-        
-            
-
-            
-
-            // lets get the channel for the single end reads first
-            // only use the single end read 1 data from the end seq which are already stored here: /rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs
-
-        
-
-            params.single_end_reads = file('/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz')
-            se_reads_files = Channel.fromPath(params.single_end_reads)
-            
-            // now let's get the basename of the single end reads
-            // removing both the .gz and the .fastq
-            // I would normally use file.baseName here but it had the .gz and the .fastq
-            se_reads_files.flatten()
-                            .map{ file -> file.name.replace('.fastq.gz','')}
-                            .set{se_reads_name}
-            
-            // let's view both the files and the names to make sure they match in order
-            //se_reads_files.view()
-            //se_reads_name.view()
-            // this is where i send both the input file and their corresponding basenames to the fastp_SE process
-            
-
-            // if the adapter sequence is known then input it as a string if not dont use the parameter
-            if ( params.ada_seq ) {
-
-                params.adapter_seq_str = 'AGATCGGAAGAGC' // this is just a place holder value for the adapter sequence
-                adapter_ch = Channel.value(params.adapter_seq_str)
-
-                fastp_SE_adapter_known(se_reads_files.take(3), se_reads_name.take(3), adapter_ch) // will have to make a new process for if the adapter sequence is known
-
-                fastq_filts = fastp_SE_adapter_known.out.filtered_fastqs
-                //fastp_SE.out.view()
-                fastq_filts.map{file -> file.baseName}
-                            .set{fastq_filts_name}
-
-                // now getting the html files since i think fastqc combines them into one, that might be multiqc
-                fastp_filt_html = fastp_SE_adapter_known.out.fastp_html_reports
-
-            }    
-            else {
-
-                fastp_SE(se_reads_files.take(3), se_reads_name.take(3))
-
-                    // take all of the filtered fastq files and put them in a channel name
-                // since the fastq files might be in a different order, if i need to get their base names I will have to do it from this new channel below
-                fastq_filts = fastp_SE.out.filtered_fastqs
-                //fastp_SE.out.view()
-                fastq_filts.map{file -> file.baseName}
-                            .set{fastq_filts_name}
-
-                // now getting the html files since i think fastqc combines them into one, that might be multiqc
-                fastp_filt_html = fastp_SE.out.fastp_html_reports
-
-
-
-            }
-            
-
-            //fastp_SE(se_reads_files.take(3), se_reads_name.take(3)) // REMEMBER TO REMOVE THIS TESTING FEATURE WHERE IT WILL ONLY TAKE THE FIRST 3
-
-            
-
-            
-            //fastp_SE.out.view()
-
-            //fastq_filts.view()
-            //fastp_filt_html.view()
-            //fastp_filt_html.collect().view()
-
-
-            // now creating a fastqc process
-            fastqc_SE(fastq_filts, fastq_filts_name)
-
-            fastqc_html_files = fastqc_SE.out.fastqc_htmls
-            fastqc_zips = fastqc_SE.out.fastqc_zip_files
-
-            // now using multiqc to combine all of the se zip files. Multiqc takes the zip files generated by fastqc and puts them in a single html file
-            multiqc_SE(fastqc_zips.collect())
-
-            // first have a seprate process that indexes the reference genome using bwa or bwa mem so this part doesnt have to be done again and will be cached
-            bwa_index_genome(genome_ch)
-
-            // collecting the genome index files from the last process 
-            // not sure if i should keep track of the order the files are in first
-            // it looks like they are in the same order that they appeared in the published dir using ll
-            //bwa_index_genome.out.genome_index_files.view()
-            genome_index_files_ch = bwa_index_genome.out.genome_index_files
-
-            // Now I need to pass the human genome file to the process to index the genome file. Also I will add the filtered fastq files from fastp into this process that will be aligned to the genome. 
-            // each run of this only takes 20-30 min to run but since the hpc only is allowing 2-3 to run at one time it takes 3 hours
-            bwa_align_SE(genome_ch, genome_index_files_ch, fastq_filts, fastq_filts_name )
-
-            //bwa_align_SE.out.sam_se_files.view()
-
-            // making a channel for the sam files generated
-            sam_files = bwa_align_SE.out.sam_se_files
-
-            // now I want to take any sam files generated by the bwa and use samtools to order them and convert them into bam files
-            // I will hopefully be able to do this outside of the if else statement so the sam file from both conditions can be passed to the same samtools process
-            // since i am just testing the pipeline i should find a way to do this on only a few files (about 3-4)
-            
-            samtools_sort(sam_files.take(3)) // using take 3 should only take the first 3 files from the sam_files channel which should have 64 sam files. This is just for production and testing. will remove when running pipeline for real.
-
-            //samtools_sort.out.sorted_bams.view()
-            //samtools_sort.out.indexed_bams.view()
-            //samtools_sort.out.bam_index_tuple.view()
-
-            sorted_bams_ch = samtools_sort.out.sorted_bams
-            indexed_bams_ch = samtools_sort.out.indexed_bams
-            both_bam_index_ch = samtools_sort.out.bam_index_tuple
-            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
-
-            // if you want to filter black list use the param --BL in the command line when calling nextflow
-            if ( params.BL ) {
-
-                // using bedtools to filter black list but first giving the user an option to put the correct black list for an organism
-                // by defualt it will use the hg19 v2 blacklist, but if you used a different organism or human genome use the appropriate blacklist
-                //params.blacklist_path = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/blacklist/hg19-blacklist.v2.bed')
-                
-                //blacklist_ch = Channel.value(params.blacklist_path)
-
-                bedtools_filt_blacklist(both_bam_index_ch, blacklist_ch)
-
-                bl_filt_bams_ch = bedtools_filt_blacklist.out.bl_filtered_bams
-                // i will need to index the black list filtered bam again so i have to create a different samtools process for this
-                samtools_bl_index(bl_filt_bams_ch)
-
-                bl_filt_bam_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
-
-                // then i need to pass the indexed_bl_bam and the bam to the deeptools process
-
-                deeptools_make_bed(bl_filt_bam_tuple_ch)
-                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
-
-            }
-
-            else {
-
-                // Now i want to pass the tuple that has the bam and its corresponding index file into a process that will create a bigwig file for visulization, created from the bam file. This will show read coverage in the genome without looking for significant areas
-                deeptools_make_bed(both_bam_index_ch)
-
-                //deeptools_make_bed.out.bed_files_normalized.view()
-                bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
-            }
-    
-
-            // i will either use the bams or the bed files for any future processes depending on what tool needs what.
+        publishDir './results_SE/atac_shift_bam', mode: 'copy', pattern: '*shift.bam'
     }
 
-    // now I need to make the paired-end part of this pipeline.
-    else if (params.PE) {
 
-        // this will take the paired end reads and keep them together
-        params.paired_end_reads = '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*'
-
-        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
-
-        //pe_fastqs_ch.view()
-
-        fastp_PE(pe_fastqs_ch.take(3))
-
-        // checking the channels to see if everything works
-        //fastp_PE.out.filt_PE_tuple.view()
-
-        //fastp_PE.out.html_fastp_out.view()
-        //fastp_PE.out.failed_reads_out.view()
-        //fastp_PE.out.
-
-        pe_filt_tuple_ch = fastp_PE.out.filt_PE_tuple
-
-        fastqc_PE(pe_filt_tuple_ch)
-
-        //fastqc_PE.out.fastqc_zip_files.view()
+    input:
+    tuple path(bam), path(index)
 
 
-        // then collect them so i can view in one file using multiqc.
-        collection_fastqc_ch =fastqc_PE.out.fastqc_zip_files.collect()
-
-        multiqc_PE(collection_fastqc_ch)
-
-        //multiqc_PE.out.summary_of_PE_filt.view()
-
-        // first use the process to index the reference genome since the process exists already for the se
-
-        bwa_index_genome(genome_ch)
-
-        //bwa_index_genome.out.genome_index_files.view()
-
-        genome_index_ch = bwa_index_genome.out.genome_index_files
-
-        // now to use bwa aln and bwa sampe to align the filtered pair end reads to the reference genome and then to create the sam file respectively
-
-        //pe_filt_tuple_ch.view()
-        //genome_ch.view()
-        //genome_index_ch.view()
-
-        bwa_PE_aln(pe_filt_tuple_ch, genome_ch, genome_index_ch)
-
-        // now check to see if the output channels are good
-        //bwa_PE_aln.out.pe_sam_files.view()
-        
-        
-        // now i need to make the parameters for  if the bam file will be blacklist filtered or not
-        
-        // using this channel for both if Blacklist or not
-        sam_files_pe_ch = bwa_PE_aln.out.pe_sam_files
-
-        if (params.BL) {
-
-            
-            // i have to make a bam file to then use bedtools intersect to get the blacklist
-            // using the same samtools sort process found in the SE part of the pipeline
-            samtools_sort(sam_files_pe_ch)
-
-            samtools_sort.out.bam_index_tuple.view()
-
-            bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
-            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
-
-            // this will give a blacklist filtered bam but i need to index it again
-            bedtools_filt_blacklist(bam_index_tuple_ch, blacklist_ch)
-            bedtools_filt_blacklist.out.bl_filtered_bams.view()
-
-            bl_filt_bams_ch = bedtools_filt_blacklist.out.bl_filtered_bams
-            // so using the process to only index which means it will take the blacklist bam file
-
-            samtools_bl_index(bl_filt_bams_ch)
-
-            bl_filt_bam_tuple_ch = samtools_bl_index.out.bl_filt_bam_index_tuple
-
-            // so this would give a bam that is bl filtered and has an index
-            
-            // now i want to take the bl filt bam files and pass them to deep tools to be converted into bed files
-
-            deeptools_make_bed(bl_filt_bam_tuple_ch)
-
-            deeptools_make_bed.out.bed_files_normalized.view()
-
-            bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+    output:
+    tuple path("*shift.bam"), emit: atac_shifted_bam
 
 
-        }
-        else {
-            samtools_sort(sam_files_pe_ch)
+    script:
+    out_file = "${bam.baseName}_ATAC_shift.bam"
 
-            samtools_sort.out.bam_index_tuple.view()
+    """
+    #!/usr/bin/env bash 
 
-            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+    ##### deeptools alignmentSieve params #####
+    # --bam : this takes your input bam file
+    # --numberofProcessors : number of threads 
+    # --ATACshift : Shift the produced BAM file or BEDPE regions as commonly done for ATAC-seq
+    ###########################################
 
-            bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
-
-            // just using the original sorted and indexed bam
-
-            deeptools_make_bed(bam_index_tuple_ch)
-
-            deeptools_make_bed.out.bed_files_normalized.view()
-
-            bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+    alignmentSieve \
+    --bam "${bam}" \
+    --numberOfProcessors 12 \
+    --ATACshift \
+    -o "${out_file}"
 
 
-        }
 
-        
 
- 
-    }
+    """
+}*/
 
-    // making a multiqc process for the samtools flagstat log files. this should be able to take the flagstat_log_ch from any part of the choosen paths
-    multiqc_bam_stats(flagstat_log_ch)
-}
