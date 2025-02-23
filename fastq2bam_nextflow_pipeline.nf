@@ -1705,7 +1705,9 @@ workflow {
                 samtools_index_sort(atac_shift_bam_ch)
 
                 // so now name the tuple channel output appropriately 
-                atac_shift_bam_index_ch = samtools_index_sort.out.bl_filt_bam_index_tuple
+                atac_shift_bam_index_ch = samtools_index_sort.out.bl_filt_bam_index_tuple // change the name of the emit channel to just bam_index_tuple without the file. go to the module file to  change it there also, and look for other comments to change in that channel.
+                // for the above channel 'samtools_index_sort' go to the module process and look at how I change the publish dir options to account for if ATAC and BL are used together, and if only ATAC is used, for both PE and SE parameters.
+
 
                 // now making the bed files for atac seq
 
