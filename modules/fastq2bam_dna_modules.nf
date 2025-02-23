@@ -1327,46 +1327,46 @@ process samtools_index_sort {
 
     //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
     if (params.PE) {
+        // try this modification; this will be if the user specified both ATAC and BL parameters publish in this directory
+        if (params.ATAC && params.BL) {
 
-        if (params.ATAC) {
-
-            publishDir './results_PE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_PE/ATAC_blacklist_filt_bam/ATAC_bl_filt_index', mode: 'copy', pattern: '*.bai'
             publishDir './results_PE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
 
         }
-        else {
+        else if (params.ATAC) {
 
-            publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
-            publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+            publishDir './results_PE/ATAC_filt_bam/ATAC_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_PE/ATAC_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
         }
 
        
     
     }
-    else {
+    else if (params.SE ) {
 
-        if (params.ATAC) {
+        if (params.ATAC && params.BL) {
 
-            publishDir './results_SE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_SE/ATAC_blacklist_filt_bam/ATAC_bl_filt_index', mode: 'copy', pattern: '*.bai'
             publishDir './results_SE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
 
         }
-        else {
+        else if (params.ATAC) {
 
-            publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
-            publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+            publishDir './results_SE/ATAC_filt_bam/ATAC_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_SE/ATAC_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
         }
 
           
     }
 
     input:
-    path(bl_filt_bam)
+    path(bl_filt_bam) // change this and other occurences to just filt_bam or just bam
 
 
     output:
 
-    tuple path("${out_bam_name_sort}"), path("*.bai"), emit: bl_filt_bam_index_tuple
+    tuple path("${out_bam_name_sort}"), path("*.bai"), emit: bl_filt_bam_index_tuple // change this to bam_index_tuple
     
     
 
