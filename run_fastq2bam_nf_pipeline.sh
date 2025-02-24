@@ -25,6 +25,8 @@ conda activate nextflow_three
 # --blacklist_path : give the path to the blacklist bed file you have and include the file in the path. the defualt used is a path to the hg19 v2 black list. so if using a different species or a different human genome use the correct blacklist and not the default.
 # --use_effectiveGenomeSize : this should be called if you want the pipeline to use the path where deeptools bamcoverage will take the effective genome size. this parameter does not take the number see next parameter
 # --num_effectiveGenomeSize : if you used the parameter --use_effectiveGenomeSize then you need to use this one also. this one takes the number and you can go to deeptools website to find the correct effective genome size number to use here: https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html
+# --spike_in : lets the pipeline know it should run the workflow for spike ins
+# --end_seq : the pipeline will run the single end path since end_seq uses single end reads 
 ########################################
 
 ########### for PE data ##############
@@ -39,7 +41,8 @@ conda activate nextflow_three
 # --blacklist_path : once you choose --BL, use this parameter to specify the blacklist bed file if you changed the genome from the defualt genome. you dont have to do this if you didnt use the --genome parameter to choose a different genome.
 # --use_effectiveGenomeSize : this should be called if you want the pipeline to use the path where deeptools bamcoverage will take the effective genome size. this parameter does not take the number see next parameter
 # --num_effectiveGenomeSize : if you used the parameter --use_effectiveGenomeSize then you need to use this one also. this one takes the number as a str and you can go to deeptools website to find the correct effective genome size number to use that here: https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html
-
+# --spike_in : lets the pipeline know it should run the workflow for spike ins
+# --gloe_seq : pipeline will run the pair end path since gloe_seq uses pair end reads, it will use the t7 genome file. (since gloe_seq uses pair end reads, you shouldn't be using the gloe_seq parameter with the single end parameters)
 ######################################
 
 ################# parameters for spike in ##################################
@@ -62,8 +65,10 @@ conda activate nextflow_three
 #-resume \
 #--SE \
 #--single_end_reads '/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz' \
-#--ada_seq --adapter_seq_str 'AGATCGGAAGAGC' \
-#--BL 
+#--ada_seq --adapter_seq_str 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCA' \
+#--BL \
+#--spike_in \
+#--end_seq
 
 
 
@@ -77,7 +82,8 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 --num_effectiveGenomeSize '2864785220' \
 --calc_break_density \
 --spike_in \
---gloe_seq
+--gloe_seq \
+--end_seq 
 
 #--ATAC
 

@@ -1195,7 +1195,15 @@ include {breakDensityWrapper_workflow} from './workflows/breakDensityWrapper_wor
 
 //include {py_calc_stats_log} from './modules/fastq2bam_dna_modules.nf'
 
-include {spike_in_runs_workflow} from './workflows/spike_in_workflow.nf'
+//include {spike_in_runs_workflow} from './workflows/spike_in_workflow.nf'
+include {
+    gloe_seq_pe_workflow;
+    end_seq_pe_workflow
+            
+            
+} from './workflows/2nd_spike_in_workflow.nf'
+
+
 
 workflow {
 
@@ -1705,7 +1713,7 @@ workflow {
                 samtools_index_sort(atac_shift_bam_ch)
 
                 // so now name the tuple channel output appropriately 
-                atac_shift_bam_index_ch = samtools_index_sort.out.bl_filt_bam_index_tuple
+                atac_shift_bam_index_ch = samtools_index_sort.out.bam_index_tuple // i changed the emit ch to just be bam_index_tuple
 
                 // now making the bed files for atac seq
 
@@ -1777,15 +1785,35 @@ workflow {
     // looking to run the spike_in workflow
     
 
+    // if (params.spike_in) {
+
+    //     // all this is doing is running the normal fastq2bam2 pipeline but with the specified genomes for spike in
+    //     spike_in_runs_workflow()
+
+    //     // not sure if i would need to make this channel the normal 'bam_index_tuple_ch', or do what i did with atac-seq and give it a unique name calling it 'spike_in_bam_index_ch'
+    //     // since spike in can occur at the same time as either pe or se, i need to give this channel a unique name. I dont think spike in bam files need to have break density calculated
+    //     spike_in_bam_index_ch = spike_in_runs_workflow.out.spike_in_bam_index_tuple_ch
+    //     //spike_in_bed_files_norm_ch = spike_in_runs_workflow.out.spike_in_bed_files_norm_ch
+
+    // }
+
     if (params.spike_in) {
 
         // all this is doing is running the normal fastq2bam2 pipeline but with the specified genomes for spike in
-        spike_in_runs_workflow()
+        
+        if (params.PE) {
+
+            gloe_seq_pe_workflow()
+            end_seq_pe_workflow()
+        }
 
         // not sure if i would need to make this channel the normal 'bam_index_tuple_ch', or do what i did with atac-seq and give it a unique name calling it 'spike_in_bam_index_ch'
         // since spike in can occur at the same time as either pe or se, i need to give this channel a unique name. I dont think spike in bam files need to have break density calculated
-        spike_in_bam_index_ch = spike_in_runs_workflow.out.bam_index_tuple_ch
+        //spike_in_bam_index_ch = spike_in_runs_workflow.out.spike_in_bam_index_tuple_ch
+        //spike_in_bed_files_norm_ch = spike_in_runs_workflow.out.spike_in_bed_files_norm_ch
 
     }
+
+    
     
 }
