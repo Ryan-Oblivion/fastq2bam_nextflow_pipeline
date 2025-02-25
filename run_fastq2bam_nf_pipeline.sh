@@ -26,7 +26,8 @@ conda activate nextflow_three
 # --use_effectiveGenomeSize : this should be called if you want the pipeline to use the path where deeptools bamcoverage will take the effective genome size. this parameter does not take the number see next parameter
 # --num_effectiveGenomeSize : if you used the parameter --use_effectiveGenomeSize then you need to use this one also. this one takes the number and you can go to deeptools website to find the correct effective genome size number to use here: https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html
 # --spike_in : lets the pipeline know it should run the workflow for spike ins
-# --end_seq : the pipeline will run the single end path since end_seq uses single end reads 
+# --t7, --lambda : choose one or both and the single end spike in workflow for these will be executed. Have to use with parameter --spike_in
+# --yeast : choose the yeast spike in if you have ricc_seq data or data that wants yeast spike in, and the single end spike end will run. must use with parameter --spike_in
 ########################################
 
 ########### for PE data ##############
@@ -42,21 +43,10 @@ conda activate nextflow_three
 # --use_effectiveGenomeSize : this should be called if you want the pipeline to use the path where deeptools bamcoverage will take the effective genome size. this parameter does not take the number see next parameter
 # --num_effectiveGenomeSize : if you used the parameter --use_effectiveGenomeSize then you need to use this one also. this one takes the number as a str and you can go to deeptools website to find the correct effective genome size number to use that here: https://deeptools.readthedocs.io/en/latest/content/feature/effectiveGenomeSize.html
 # --spike_in : lets the pipeline know it should run the workflow for spike ins
-# --gloe_seq : pipeline will run the pair end path since gloe_seq uses pair end reads, it will use the t7 genome file. (since gloe_seq uses pair end reads, you shouldn't be using the gloe_seq parameter with the single end parameters)
+# --t7, --lambda : choose one or both and the pair end spike in workflow for these will be executed. Have to use with parameter --spike_in
+# --yeast : choose the yeast spike in if you have ricc_seq data or data that wants yeast spike in, and the pair end spike end will run. must use with parameter --spike_in
 ######################################
 
-################# parameters for spike in ##################################
-# give option for spike in
-# NOTE: for endseq and gloeseq have a branch of the pipeline aligning to the lamda genome(end-seq) and T7 genome(Gloe-seq) with the same data. Important to know the number of reads and dup rate
-# NOTE:  FOR RICC-seq yeast genome
-
-# --spike_in : lets the pipeline know it should run the workflow for spike ins
-# --end_seq : the pipeline will run the single end path since end_seq uses single end reads 
-# --gloe_seq : pipeline will run the pair end path since gloe_seq uses pair end reads, it will use the t7 genome file. (since gloe_seq uses pair end reads, you shouldn't be using the gloe_seq parameter with the single end parameters)
-# --ricc_seq : not sure what type of experiment ricc seq is
-
-
-#####################################################
 # NOTE: path to the peak files /lustre/fs4/home/ascortea/store/ascortea/beds
      # then get the different peak directories IMR90, k562, BJ subdirectories hold these peak files
 
@@ -68,7 +58,8 @@ conda activate nextflow_three
 #--ada_seq --adapter_seq_str 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCA' \
 #--BL \
 #--spike_in \
-#--end_seq
+#--t7 \
+#--lambda
 
 
 
@@ -82,8 +73,8 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 --num_effectiveGenomeSize '2864785220' \
 --calc_break_density \
 --spike_in \
---gloe_seq \
---end_seq 
+--t7 \
+--lambda 
 
 #--ATAC
 
@@ -91,5 +82,6 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 
  # NOTE: If you want to make your own nextflow diagram to see how the pipeline works run this command
 
-# -with-dag fastq2bam_nf_pipeline_flowchart.png, it seems like this alone overwrites the resume option
+# -with-dag fastq2bam_nf_pipeline_flowchart.png{.html,.svg,.pdf}, it seems like this alone overwrites the resume option
 # add -preview to render it without having to run the pipeline 
+# i like the html best but pdf or png might be a good second
