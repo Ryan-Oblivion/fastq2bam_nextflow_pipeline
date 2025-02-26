@@ -64,7 +64,7 @@ workflow pe_t7_spike_in_workflow {
 
     emit:
     spike_in_bam_index_tuple_ch
-    //spike_in_bed_files_norm_ch
+    spike_in_bed_files_norm_ch
 
 
 
@@ -77,7 +77,18 @@ workflow pe_t7_spike_in_workflow {
     // this will take the paired end reads and keep them together
     //params.paired_end_reads = '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*'
 
-    pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+    //pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+
+    if (params.test) {
+            
+        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+        
+    }else {
+
+        
+        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
+
+    }
 
     //pe_fastqs_ch.view()
 
@@ -207,7 +218,7 @@ workflow pe_t7_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
 
 
 
@@ -222,7 +233,7 @@ workflow pe_t7_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
 
 
     }
@@ -240,8 +251,9 @@ workflow pe_lambda_spike_in_workflow {
     // take:
     // base_dir_results
 
-    emit: 
+    emit:
     spike_in_bam_index_tuple_ch
+    spike_in_bed_files_norm_ch
 
 
     main:
@@ -252,7 +264,19 @@ workflow pe_lambda_spike_in_workflow {
     // this will take the paired end reads and keep them together
     //params.paired_end_reads = '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*'
 
-    pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+    //pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+
+    if (params.test) {
+            
+        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+    
+    }else {
+
+        
+        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
+
+    }
+
 
     //pe_fastqs_ch.view()
 
@@ -380,7 +404,7 @@ workflow pe_lambda_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
 
 
 
@@ -395,7 +419,7 @@ workflow pe_lambda_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
 
 
     }
@@ -409,6 +433,7 @@ workflow pe_yeast_spike_in_workflow {
     
     emit:
     spike_in_bam_index_tuple_ch
+    spike_in_bed_files_norm_ch
 
 
     main:
@@ -419,7 +444,18 @@ workflow pe_yeast_spike_in_workflow {
     // this will take the paired end reads and keep them together
     //params.paired_end_reads = '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*'
 
-    pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+    //pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+
+    if (params.test) {
+            
+        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+    
+    }else {
+
+        
+        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
+
+    }
 
     //pe_fastqs_ch.view()
 
@@ -548,7 +584,7 @@ workflow pe_yeast_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
 
 
 
@@ -563,7 +599,7 @@ workflow pe_yeast_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
 
 
     }
@@ -574,15 +610,27 @@ workflow pe_yeast_spike_in_workflow {
 workflow se_t7_spike_in_workflow {
 
 
-    emit: 
+    emit:
     spike_in_bam_index_tuple_ch
+    spike_in_bed_files_norm_ch
 
 
     main:
 
 
     //params.single_end_reads = file('/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz')
-    se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+    //se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+
+    if (params.test) {
+        se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+        
+    
+    }else {
+
+        se_reads_files = Channel.fromPath(params.single_end_reads)
+        
+
+    }
     
     // now let's get the basename of the single end reads
     // removing both the .gz and the .fastq
@@ -730,7 +778,7 @@ workflow se_t7_spike_in_workflow {
 
     //         deeptools_make_bed.out.bed_files_normalized.view()
 
-    //         bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+    //         spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
 
 
@@ -745,7 +793,7 @@ workflow se_t7_spike_in_workflow {
 
     //         deeptools_make_bed.out.bed_files_normalized.view()
 
-    //         bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
+    //         spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
 
 
     //     }*/
@@ -753,7 +801,7 @@ workflow se_t7_spike_in_workflow {
     //     // then i need to pass the indexed_bl_bam and the bam to the deeptools process
 
     //     //deeptools_make_bed(bam_index_tuple_ch)
-    //     //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+    //     //spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
     // }
 
@@ -779,7 +827,7 @@ workflow se_t7_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
 
 
 
@@ -794,7 +842,7 @@ workflow se_t7_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
 
 
     }
@@ -811,15 +859,27 @@ workflow se_t7_spike_in_workflow {
 workflow se_lambda_spike_in_workflow {
 
 
-    emit: 
+    emit:
     spike_in_bam_index_tuple_ch
+    spike_in_bed_files_norm_ch
 
 
     main:
 
 
     //params.single_end_reads = file('/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz')
-    se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+    //se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+
+    if (params.test) {
+        se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+        
+    
+    }else {
+
+        se_reads_files = Channel.fromPath(params.single_end_reads)
+        
+
+    }
     
     // now let's get the basename of the single end reads
     // removing both the .gz and the .fastq
@@ -967,7 +1027,7 @@ workflow se_lambda_spike_in_workflow {
 
     //         deeptools_make_bed.out.bed_files_normalized.view()
 
-    //         bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+    //         spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
 
 
@@ -982,7 +1042,7 @@ workflow se_lambda_spike_in_workflow {
 
     //         deeptools_make_bed.out.bed_files_normalized.view()
 
-    //         bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
+    //         spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
 
 
     //     }*/
@@ -990,7 +1050,7 @@ workflow se_lambda_spike_in_workflow {
     //     // then i need to pass the indexed_bl_bam and the bam to the deeptools process
 
     //     //deeptools_make_bed(bam_index_tuple_ch)
-    //     //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+    //     //spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
     // }
 
@@ -1016,7 +1076,7 @@ workflow se_lambda_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
 
 
 
@@ -1031,7 +1091,7 @@ workflow se_lambda_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
 
 
     }
@@ -1047,15 +1107,28 @@ workflow se_lambda_spike_in_workflow {
 workflow se_yeast_spike_in_workflow {
 
 
-    emit: 
+    emit:
     spike_in_bam_index_tuple_ch
+    spike_in_bed_files_norm_ch
 
 
     main:
 
 
     //params.single_end_reads = file('/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz')
-    se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+    //se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+
+    if (params.test) {
+        se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+        
+    
+    }else {
+
+        se_reads_files = Channel.fromPath(params.single_end_reads)
+        
+
+    }
+
     
     // now let's get the basename of the single end reads
     // removing both the .gz and the .fastq
@@ -1203,7 +1276,7 @@ workflow se_yeast_spike_in_workflow {
 
     //         deeptools_make_bed.out.bed_files_normalized.view()
 
-    //         bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+    //         spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
 
 
@@ -1218,7 +1291,7 @@ workflow se_yeast_spike_in_workflow {
 
     //         deeptools_make_bed.out.bed_files_normalized.view()
 
-    //         bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
+    //         spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized          
 
 
     //     }*/
@@ -1226,7 +1299,7 @@ workflow se_yeast_spike_in_workflow {
     //     // then i need to pass the indexed_bl_bam and the bam to the deeptools process
 
     //     //deeptools_make_bed(bam_index_tuple_ch)
-    //     //bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
+    //     //spike_in_bed_files_norm_ch = deeptools_make_bed.out.bed_files_normalized
 
     // }
 
@@ -1252,7 +1325,7 @@ workflow se_yeast_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized
 
 
 
@@ -1267,7 +1340,7 @@ workflow se_yeast_spike_in_workflow {
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
-        bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
+        spike_in_bed_files_norm_ch = deeptools_make_bed_spike_in.out.bed_files_normalized        
 
 
     }

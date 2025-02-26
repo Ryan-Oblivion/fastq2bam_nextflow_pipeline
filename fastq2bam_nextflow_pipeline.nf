@@ -9,6 +9,7 @@ params.base_out_dir = params.PE ? './results_PE' : (params.SE ? './results_SE' :
 // finally using modules
 
 
+
 include {
     fastp_SE_adapter_known;
     fastp_SE;
@@ -81,14 +82,25 @@ workflow {
 
     // i want to add an if then logic to the pipeline so i know which type of reads are comming in paired end or single end
 
-    //if ( params.PE )
-         // lets get the channel for the reads first
+    
 
-      //   fastp_PE()
-         
-         //align_PE_reads(genome_ch)
+    // params.single_end_reads = file('/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz')
+    // params.paired_end_reads = '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*'
+
+        
+
+    // // this will give the user to run in test mode where the pipeline will only take 3 of the fastq files in the directory full of fastq files
+    // // or it will run in normal mode where you want all your data processed
+    // if (params.test) {
+    //     se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+    //     pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
     
-    
+    // }else {
+
+    //     se_reads_files = Channel.fromPath(params.single_end_reads)
+    //     pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
+
+    // }
     
     
     if ( params.SE ) {
@@ -101,10 +113,28 @@ workflow {
             // lets get the channel for the single end reads first
             // only use the single end read 1 data from the end seq which are already stored here: /rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs
 
+            params.single_end_reads = file('/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz')
+    
+
         
 
-            params.single_end_reads = file('/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz')
-            se_reads_files = Channel.fromPath(params.single_end_reads)
+            // this will give the user to run in test mode where the pipeline will only take 3 of the fastq files in the directory full of fastq files
+            // or it will run in normal mode where you want all your data processed
+            if (params.test) {
+                se_reads_files = Channel.fromPath(params.single_end_reads).take(3)
+                
+            
+            }else {
+
+                se_reads_files = Channel.fromPath(params.single_end_reads)
+               
+
+            }
+
+
+
+            //params.single_end_reads = file('/rugpfs/fs0/risc_lab/store/hcanaj/HC_ENDseq_Novaseq_010925/read1_fastqs/*_1.fastq.gz')
+            //se_reads_files = Channel.fromPath(params.single_end_reads)
             
             // now let's get the basename of the single end reads
             // removing both the .gz and the .fastq
@@ -125,7 +155,7 @@ workflow {
                 params.adapter_seq_str = 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCA' // this is just a place holder value for the adapter sequence
                 adapter_ch = Channel.value(params.adapter_seq_str)
 
-                fastp_SE_adapter_known(se_reads_files.take(3), se_reads_name.take(3), adapter_ch) // will have to make a new process for if the adapter sequence is known
+                fastp_SE_adapter_known(se_reads_files, se_reads_name, adapter_ch) // will have to make a new process for if the adapter sequence is known
 
                 fastq_filts = fastp_SE_adapter_known.out.filtered_fastqs
                 //fastp_SE.out.view()
@@ -138,7 +168,7 @@ workflow {
             }    
             else {
 
-                fastp_SE(se_reads_files.take(3), se_reads_name.take(3))
+                fastp_SE(se_reads_files, se_reads_name)
 
                     // take all of the filtered fastq files and put them in a channel name
                 // since the fastq files might be in a different order, if i need to get their base names I will have to do it from this new channel below
@@ -155,7 +185,7 @@ workflow {
             }
             
 
-            //fastp_SE(se_reads_files.take(3), se_reads_name.take(3)) // REMEMBER TO REMOVE THIS TESTING FEATURE WHERE IT WILL ONLY TAKE THE FIRST 3
+            //fastp_SE(se_reads_files, se_reads_name) // REMEMBER TO REMOVE THIS TESTING FEATURE WHERE IT WILL ONLY TAKE THE FIRST 3
 
             
 
@@ -339,13 +369,32 @@ workflow {
     else if (params.PE) {
 
         // this will take the paired end reads and keep them together
+        // params.paired_end_reads = '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*'
+
+        // pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
+
+        
         params.paired_end_reads = '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*'
 
-        pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
+            
+
+        // this will give the user to run in test mode where the pipeline will only take 3 of the fastq files in the directory full of fastq files
+        // or it will run in normal mode where you want all your data processed
+        if (params.test) {
+            
+            pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads).take(3)
+        
+        }else {
+
+            
+            pe_fastqs_ch = Channel.fromFilePairs(params.paired_end_reads)
+
+        }
+
 
         //pe_fastqs_ch.view()
 
-        fastp_PE(pe_fastqs_ch.take(3))
+        fastp_PE(pe_fastqs_ch)
 
         // checking the channels to see if everything works
         //fastp_PE.out.filt_PE_tuple.view()
@@ -644,51 +693,57 @@ workflow {
     // looking to run the spike_in workflow
     
 
-    // if (params.spike_in) {
-
-    //     // all this is doing is running the normal fastq2bam2 pipeline but with the specified genomes for spike in
-    //     spike_in_runs_workflow()
-
-    //     // not sure if i would need to make this channel the normal 'bam_index_tuple_ch', or do what i did with atac-seq and give it a unique name calling it 'spike_in_bam_index_ch'
-    //     // since spike in can occur at the same time as either pe or se, i need to give this channel a unique name. I dont think spike in bam files need to have break density calculated
-    //     spike_in_bam_index_ch = spike_in_runs_workflow.out.spike_in_bam_index_tuple_ch
-    //     //spike_in_bed_files_norm_ch = spike_in_runs_workflow.out.spike_in_bed_files_norm_ch
-
-    // }
-
     if (params.spike_in) {
 
         // all this is doing is running the normal fastq2bam2 pipeline but with the specified genomes for spike in
-        
+       
         if (params.PE) {
 
-            if (params.t7 || params.lambda) {
+            if (params.t7 ) {
 
                 pe_t7_spike_in_workflow()
+                // now getting the output channels from the workflows just incase i need to use them in a downstream analysis
+                pe_t7_bam_index_tuple_ch = pe_t7_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                pe_t7_bed_files = pe_t7_spike_in_workflow.out.spike_in_bed_files_norm_ch
+            }
+            if (params.lambda) {
+
                 pe_lambda_spike_in_workflow()
 
-            }else if (params.yeast) {
+                pe_lambda_bam_index_tuple_ch = pe_lambda_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                pe_lambda_bed_files = pe_lambda_spike_in_workflow.out.spike_in_bed_files_norm_ch
+            }
+            if (params.yeast) {
 
                 // so i would put the yeast spike in workflow here, for example.
                 pe_yeast_spike_in_workflow()
 
+                pe_yeast_bam_index_tuple_ch = pe_yeast_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                pe_yeast_bed_files = pe_yeast_spike_in_workflow.out.spike_in_bed_files_norm_ch
             }
-
-
-
         }
         if (params.SE) {
 
             //for this i need to make the single end workflow for spike ins
-            if (params.t7 || params.lambda) {
+            if (params.t7) {
 
                 se_t7_spike_in_workflow()
-                se_lambda_spike_in_workflow()
 
-            }else if (params.yeast) {
+                se_t7_bam_index_tuple_ch = se_t7_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                se_t7_bed_files = se_t7_spike_in_workflow.out.spike_in_bed_files_norm_ch
+            }
+            if (params.lambda) {
+
+                se_lambda_spike_in_workflow()
+                se_lambda_bam_index_tuple_ch = se_lambda_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                se_lambda_bed_files = se_lambda_spike_in_workflow.out.spike_in_bed_files_norm_ch
+            }           
+            if (params.yeast) {
 
                 // so i would put the yeast spike in workflow here, for example.
                 se_yeast_spike_in_workflow()
+                se_yeast_bam_index_tuple_ch = se_yeast_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                se_yeast_bed_files = se_yeast_spike_in_workflow.out.spike_in_bed_files_norm_ch
             }
 
         }

@@ -16,6 +16,7 @@ source /lustre/fs4/home/rjohnson/.bashrc_rj_test.sh
 conda activate nextflow_three
 
 ########## for SE data ###############
+# --test: parameter will make the pipeline only take 3 of your fastq files(or fastq pairs in pair end) in your directory of many fastq files. without this the pipeline will run and process all of your fastq files
 # --ATAC : if you have atac-seq data, please specify this parameter
 # --SE parameter for pair end reads
 # when using SE do --single_end_reads and give the path to your single end reads with a glob pattern if you have other files in that directory you dont want ex: path/to/single_end_reads/*file*.fastq
@@ -34,6 +35,7 @@ conda activate nextflow_three
 # I will not put an option to specify adapters and put your own sequence for the Pair End part of this pipeline
 # The reason being i specified in fastp that we will look adapters for PE and just trim them. read the parameters used for the fastp tool in the fastp_PE process
 
+# --test: parameter will make the pipeline only take 3 of your fastq files(or fastq pairs in pair end) in your directory of many fastq files. without this the pipeline will run and process all of your fastq files
 # --ATAC : if you have atac-seq data, please specify this parameter
 # --genome : give the path to the reference genome file you want to use. if you dont specify then the defualt hg19 genome will be used
 # --PE : lets the pipeline know you have pair end data
@@ -66,6 +68,7 @@ conda activate nextflow_three
 
 nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 -resume \
+--test \
 --PE \
 --BL \
 --paired_end_reads '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*' \
@@ -74,7 +77,8 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 --calc_break_density \
 --spike_in \
 --t7 \
---lambda 
+--lambda \
+--yeast
 
 #--ATAC
 
