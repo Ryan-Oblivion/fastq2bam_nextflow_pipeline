@@ -577,7 +577,7 @@ process samtools_sort {
     if (params.PE) {
 
         publishDir './results_PE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './results_PE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
+        publishDir './results_PE/sorted_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
         publishDir './results_PE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
         publishDir './results_PE/stats_tsv_files', mode: 'copy', pattern: '*stats.tsv'
 
@@ -586,7 +586,7 @@ process samtools_sort {
     else if(params.SE) {
 
         publishDir './results_SE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './results_SE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
+        publishDir './results_SE/sorted_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
         publishDir './results_SE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
         publishDir './results_SE/stats_tsv_files', mode: 'copy', pattern: '*stats.tsv'
 
@@ -1262,14 +1262,15 @@ process deeptools_aln_shift {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/deeptools_rj'
 
-    if (params.PE) {
+    // commenting this out since the samtools_index_sort will have the sorted bam published so dont need another
+    /*if (params.PE) {
 
         publishDir './results_PE/atac_shift_bam', mode: 'copy', pattern: '*shift.bam'
     }
     else {
 
         publishDir './results_SE/atac_shift_bam', mode: 'copy', pattern: '*shift.bam'
-    }
+    }*/
 
 
     input:
@@ -1277,7 +1278,7 @@ process deeptools_aln_shift {
 
 
     output:
-    tuple path("*shift.bam"), emit: atac_shifted_bam
+    path("*shift.bam"), emit: atac_shifted_bam
 
 
     script:
@@ -1328,51 +1329,51 @@ process samtools_index_sort {
     //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
     if (params.PE) {
 
-        if (params.ATAC) {
-
-            publishDir './results_PE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+        if (params.ATAC && params.BL) {
+            // I want to put both the bam and the index (bai) in the same channel
+            publishDir './results_PE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*.bai'
             publishDir './results_PE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
 
         }
-        else {
+        else if(params.ATAC) {
 
-            publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
-            publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+            publishDir './results_PE/ATAC_filt_bam', mode: 'copy', pattern: '*.bai'
+            publishDir './results_PE/ATAC_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
         }
 
        
     
     }
-    else {
+    else if (params.SE) {
 
-        if (params.ATAC) {
+        if (params.ATAC && params.BL) {
 
-            publishDir './results_SE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
+            publishDir './results_SE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*.bai'
             publishDir './results_SE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
 
         }
-        else {
+        else if (params.ATAC) {
 
-            publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
-            publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+            publishDir './results_SE/ATAC_filt_bam', mode: 'copy', pattern: '*.bai'
+            publishDir './results_SE/ATAC_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
         }
 
           
     }
 
     input:
-    path(bl_filt_bam)
+    path(bam) // changed this to be just bam
 
 
     output:
 
-    tuple path("${out_bam_name_sort}"), path("*.bai"), emit: bl_filt_bam_index_tuple
+    tuple path("${out_bam_name_sort}"), path("*.bai"), emit: bam_index_tuple
     
     
 
     script:
     
-    out_bam_name_sort = "${bl_filt_bam.baseName}_sort2.bam"
+    out_bam_name_sort = "${bam.baseName}_sort2.bam"
 
     """
     ####### parameters for indexing bam ######
@@ -1385,7 +1386,7 @@ process samtools_index_sort {
     samtools sort \
     -o "${out_bam_name_sort}" \
     -O bam \
-    "${bl_filt_bam}"
+    "${bam}"
 
 
 

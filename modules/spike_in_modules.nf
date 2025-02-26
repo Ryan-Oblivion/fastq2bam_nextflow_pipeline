@@ -8,8 +8,9 @@ process fastp_SE_adapter_known_spike_in {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './results_SE/fastp_qc_single_end/spike_in', mode: 'copy', pattern:'*_fp_filt.fastq'
-    publishDir './results_SE/fastp_qc_single_end/html_reports/spike_in', mode: 'copy', pattern:'*.html'
+    
+    // publishDir "./results_SE/fastp_qc_single_end/spike_in${spike_name}", mode: 'copy', pattern:'*_fp_filt.fastq'
+    // publishDir "./results_SE/fastp_qc_single_end/html_reports/spike_in${spike_name}", mode: 'copy', pattern:'*.html'
 
     input:
     // input names dont have to be the exact same as what is seen in the workflow section of this script
@@ -17,7 +18,10 @@ process fastp_SE_adapter_known_spike_in {
     path(fastq_files) // the files
     val(fastq_names) // the names of the files as a value input channel
     val(adapter_seq)
+    tuple val(spike_name), path(spike_genome)
 
+    publishDir "${params.base_out_dir}/fastp_qc_single_end/spike_in${spike_name}", mode: 'copy', pattern:'*_fp_filt.fastq'
+    publishDir "${params.base_out_dir}/fastp_qc_single_end/html_reports/spike_in${spike_name}", mode: 'copy', pattern:'*.html'
 
     output:
     path("${out_name}"), emit: filtered_fastqs
@@ -27,7 +31,7 @@ process fastp_SE_adapter_known_spike_in {
     script:
 
     // getting the output name
-    out_name = "${fastq_names}_fp_filt.fastq"
+    out_name = "${fastq_names}${spike_name}_fp_filt.fastq"
 
 
     """
@@ -91,16 +95,18 @@ process fastp_SE_spike_in {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './results_SE/fastp_qc_single_end/spike_in', mode: 'copy', pattern:'*_fp_filt.fastq'
-    publishDir './results_SE/fastp_qc_single_end/html_reports/spike_in', mode: 'copy', pattern:'*.html'
+    // publishDir "./results_SE/fastp_qc_single_end/spike_in${spike_name}", mode: 'copy', pattern:'*_fp_filt.fastq'
+    // publishDir "./results_SE/fastp_qc_single_end/html_reports/spike_in${spike_name}", mode: 'copy', pattern:'*.html'
 
     input:
     // input names dont have to be the exact same as what is seen in the workflow section of this script
     // as long and they are in the same order, you will have the correct input
     path(fastq_files) // the files
     val(fastq_names) // the names of the files as a value input channel
+    tuple val(spike_name), path(spike_genome)
 
-
+    publishDir "${params.base_out_dir}/fastp_qc_single_end/spike_in${spike_name}", mode: 'copy', pattern:'*_fp_filt.fastq'
+    publishDir "${params.base_out_dir}/fastp_qc_single_end/html_reports/spike_in${spike_name}", mode: 'copy', pattern:'*.html'
 
     output:
     path("${out_name}"), emit: filtered_fastqs
@@ -110,7 +116,7 @@ process fastp_SE_spike_in {
     script:
 
     // getting the output name
-    out_name = "${fastq_names}_fp_filt.fastq"
+    out_name = "${fastq_names}${spike_name}_fp_filt.fastq"
 
 
     """
@@ -165,14 +171,17 @@ process fastqc_SE_spike_in {
 
     // using the conda environment 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
-    publishDir './results_SE/fastqc_htmls/spike_in', mode: 'copy', pattern: '*.html'
+    
+    // publishDir "./results_SE/fastqc_htmls/spike_in${spike_name}", mode: 'copy', pattern: '*.html'
 
 
     input:
 
     path(fastq_filt_files)
     val(fastq_filt_names)
+    tuple val(spike_name), path(spike_genome)
 
+    publishDir "${params.base_out_dir}/fastqc_htmls/spike_in${spike_name}", mode: 'copy', pattern: '*.html'
 
     output:
     path("*.html"), emit: fastqc_htmls
@@ -197,17 +206,19 @@ process fastqc_SE_spike_in {
 process multiqc_SE_spike_in {
 
     label 'spike_in_small_resources'
-    
+
     // this yml file doesnt work
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
 
     //conda '/ru-auth/local/home/rjohnson/miniconda3/envs/multiqc_rj'
     
-    publishDir './results_SE/multiQC_collection/spike_in', mode: 'copy', pattern: '*.html'
+    // publishDir "./results_SE/multiQC_collection/spike_in${spike_name}", mode: 'copy', pattern: '*.html'
 
     input:
     path(fastp_filt_html)
+    tuple val(spike_name), path(spike_genome)
 
+    publishDir "${params.base_out_dir}/multiQC_collection/spike_in${spike_name}", mode: 'copy', pattern: '*.html'
 
 
     output:
@@ -244,25 +255,18 @@ process bwa_index_genome_spike_in {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
-    if (params.gloe_seq) {
+    // publishDir "./genome_index_bwa/spike_in/genome_index${spike_name}", mode: 'copy', pattern: '*'
 
-        publishDir './genome_index_bwa/spike_in/t7_genome_index', mode: 'copy', pattern: '*'
-
-    }
-    else if (params.end_seq) {
-
-        publishDir './genome_index_bwa/spike_in/lambda_genome_index', mode: 'copy', pattern: '*'
-    }
-    else if (params.ricc_seq) {
-
-        publishDir './genome_index_bwa/spike_in/yeast_genome_index', mode: 'copy', pattern: '*'
-    }
+    // dont need the if then statement anymore
+    
     
 
 
     input:
-    path(ref_genome)
-    
+    //path(ref_genome)
+    tuple val(spike_name), path(ref_genome)
+
+    publishDir "./genome_index_bwa/spike_in/genome_index${spike_name}", mode: 'copy', pattern: '*'
 
 
     output:
@@ -302,31 +306,27 @@ process bwa_align_SE_spike_in {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
+    // // i think i can do the same here now without having too many if conditions
+    // publishDir "./results_SE/bwa_outputs_singleEnd_SAM/spike_in/sam${spike_name}", mode: 'copy', pattern: '*.sam'
+    // publishDir "./results_SE/sai_alignment_files/spike_in/sai${spike_name}", mode: 'copy', pattern: '*.sai'
+
     //publishDir './results_SE/bwa_outputs_singleEnd_SAM/spike_in', mode: 'copy', pattern: '*.sam'
     //publishDir './results_SE/sai_alignment_files/spike_in', mode: 'copy', pattern: '*.sai'
 
-    if (params.gloe_seq) {
-
-        publishDir './results_SE/bwa_outputs_singleEnd_SAM/spike_in/t7_sam', mode: 'copy', pattern: '*.sam'
-        publishDir './results_SE/sai_alignment_files/spike_in/t7_sai', mode: 'copy', pattern: '*.sai'
-    }
-    else if (params.end_seq) {
-
-        publishDir './results_SE/bwa_outputs_singleEnd_SAM/spike_in/lambda_sam', mode: 'copy', pattern: '*.sam'
-        publishDir './results_SE/sai_alignment_files/spike_in/lambda_sai', mode: 'copy', pattern: '*.sai'
-    }
-    else if (params.ricc_seq) {
-
-        publishDir './results_SE/bwa_outputs_singleEnd_SAM/spike_in/yeast_sam', mode: 'copy', pattern: '*.sam'
-        publishDir './results_SE/sai_alignment_files/spike_in/yeast_sai', mode: 'copy', pattern: '*.sai'
-    }
+    // a user running the single end path will only be using end_seq spike ins, not sure if ricc-seq will be pair end or single end
+    
+    
 
     input:
     path(ref_genome)
     path(genome_index_files)
     path(fastq_filt_files)
     val(fastq_filt_names)
+    tuple val(spike_name), path(spike_genome)
 
+    // i think i can do the same here now without having too many if conditions
+    publishDir "${params.base_out_dir}/bwa_outputs_singleEnd_SAM/spike_in/sam${spike_name}", mode: 'copy', pattern: '*.sam'
+    publishDir "${params.base_out_dir}/sai_alignment_files/spike_in/sai${spike_name}", mode: 'copy', pattern: '*.sai'
 
     output:
 
@@ -387,54 +387,43 @@ process samtools_sort_spike_in {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools-1.21_rj'
 
+    input:
+    path(sam_files)
+    tuple val(spike_name), path(spike_genome)
+
+    publishDir "${params.base_out_dir}/sorted_bam_files/spike_in${spike_name}", mode: 'copy', pattern: '*_sorted.bam'
+    publishDir "${params.base_out_dir}/sorted_bam_files/spike_in${spike_name}", mode: 'copy', pattern: '*.{bai, csi}'
+    publishDir "${params.base_out_dir}/flag_stat_log/spike_in${spike_name}", mode: 'copy', pattern: '*stats.log'
+    publishDir "${params.base_out_dir}/stats_tsv_files/spike_in${spike_name}", mode: 'copy', pattern: '*stats.tsv'
 
     // Determine the base directory (PE/SE) first
-    if (params.PE) {
-        // Handle PE with spike-ins
-        if (params.gloe_seq) {
-            publishDir './results_PE/sorted_bam_files/spike_in_t7_phage', mode: 'copy', pattern: '*_sorted.bam'
-            publishDir './results_PE/indexed_bam_files/spike_in_t7_phage', mode: 'copy', pattern: '*.{bai, csi}'
-            publishDir './results_PE/flag_stat_log/spike_in_t7_phage', mode: 'copy', pattern: '*stats.log'
-            publishDir './results_PE/stats_tsv_files/spike_in_t7_phage', mode: 'copy', pattern: '*stats.tsv'
-        } else if (params.end_seq) {
-            publishDir './results_PE/sorted_bam_files/spike_in_lambda', mode: 'copy', pattern: '*_sorted.bam'
-            publishDir './results_PE/indexed_bam_files/spike_in_lambda', mode: 'copy', pattern: '*.{bai, csi}'
-            publishDir './results_PE/flag_stat_log/spike_in_lambda', mode: 'copy', pattern: '*stats.log'
-            publishDir './results_PE/stats_tsv_files/spike_in_lambda', mode: 'copy', pattern: '*stats.tsv'
-        } else if (params.ricc_seq) {
-            publishDir './results_PE/sorted_bam_files/spike_in_yeast', mode: 'copy', pattern: '*_sorted.bam'
-            publishDir './results_PE/indexed_bam_files/spike_in_yeast', mode: 'copy', pattern: '*.{bai, csi}'
-            publishDir './results_PE/flag_stat_log/spike_in_yeast', mode: 'copy', pattern: '*stats.log'
-            publishDir './results_PE/stats_tsv_files/spike_in_yeast', mode: 'copy', pattern: '*stats.tsv'
-        } 
-    } 
-    else if (params.SE) {
+    // if (params.PE) {
+    //     // Handle PE with spike-ins
+        
+    //     publishDir "./results_PE/sorted_bam_files/spike_in${spike_name}", mode: 'copy', pattern: '*_sorted.bam'
+    //     publishDir "./results_PE/sorted_bam_files/spike_in${spike_name}", mode: 'copy', pattern: '*.{bai, csi}'
+    //     publishDir "./results_PE/flag_stat_log/spike_in${spike_name}", mode: 'copy', pattern: '*stats.log'
+    //     publishDir "./results_PE/stats_tsv_files/spike_in${spike_name}", mode: 'copy', pattern: '*stats.tsv'
+    
+        
+    // } 
+    // if (params.SE) {
 
-        // Handle SE with spike-ins
-        if (params.gloe_seq) {
-            publishDir './results_SE/sorted_bam_files/spike_in_t7_phage', mode: 'copy', pattern: '*_sorted.bam'
-            publishDir './results_SE/indexed_bam_files/spike_in_t7_phage', mode: 'copy', pattern: '*.{bai, csi}'
-            publishDir './results_SE/flag_stat_log/spike_in_t7_phage', mode: 'copy', pattern: '*stats.log'
-            publishDir './results_SE/stats_tsv_files/spike_in_t7_phage', mode: 'copy', pattern: '*stats.tsv'
-        } else if (params.end_seq) {
-            publishDir './results_SE/sorted_bam_files/spike_in_lambda', mode: 'copy', pattern: '*_sorted.bam'
-            publishDir './results_SE/indexed_bam_files/spike_in_lambda', mode: 'copy', pattern: '*.{bai, csi}'
-            publishDir './results_SE/flag_stat_log/spike_in_lambda', mode: 'copy', pattern: '*stats.log'
-            publishDir './results_SE/stats_tsv_files/spike_in_lambda', mode: 'copy', pattern: '*stats.tsv'
-        } else if (params.ricc_seq) {
-            publishDir './results_SE/sorted_bam_files/spike_in_yeast', mode: 'copy', pattern: '*_sorted.bam'
-            publishDir './results_SE/indexed_bam_files/spike_in_yeast', mode: 'copy', pattern: '*.{bai, csi}'
-            publishDir './results_SE/flag_stat_log/spike_in_yeast', mode: 'copy', pattern: '*stats.log'
-            publishDir './results_SE/stats_tsv_files/spike_in_yeast', mode: 'copy', pattern: '*stats.tsv'
-        } 
-    }
-    //publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
+    //     // Handle SE with spike-ins
+        
+    //     publishDir "./results_SE/sorted_bam_files/spike_in${spike_name}", mode: 'copy', pattern: '*_sorted.bam'
+    //     publishDir "./results_SE/sorted_bam_files/spike_in${spike_name}", mode: 'copy', pattern: '*.{bai, csi}'
+    //     publishDir "./results_SE/flag_stat_log/spike_in${spike_name}", mode: 'copy', pattern: '*stats.log'
+    //     publishDir "./results_SE/stats_tsv_files/spike_in${spike_name}", mode: 'copy', pattern: '*stats.tsv'
+        
+    // }
+    // //publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
     //publishDir './indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
     //publishDir './flag_stat_log', mode: 'copy', pattern: '*stat.log'
 
-    input:
-    path(sam_files)
-
+    // input:
+    // path(sam_files)
+    // tuple val(spike_name), path(spike_genome)
 
     output:
 
@@ -570,42 +559,34 @@ process deeptools_make_bed_spike_in {
 
     // this section is just a simple if else statement controlling the directories that are created and when the files end up
     // will copy and paste in other processes that need it.
-    if (params.PE) {
 
-        if (params.BL) {
-
-            publishDir './results_PE/bl_filt_bed/bed_graphs_deeptools/spike_in', mode: 'copy', pattern: '*'
-
-        }
-        else {
-            publishDir './results_PE/no_bl_filt/bed_graphs_deeptools/spike_in', mode: 'copy', pattern: '*'
-        }
+    // the logic should be: if reads are pair end, go to the results_PE dir and in the spike_in dir make it the spike_name based on what spike in type called this process
     
-    }
-    else {
 
-        if (params.BL) {
 
-            publishDir './results_SE/bl_filt_bed/bed_graphs_deeptools/spike_in', mode: 'copy', pattern: '*'
-
-        }
-        else {
-            publishDir './results_SE/no_bl_filt/bed_graphs_deeptools/spike_in', mode: 'copy', pattern: '*'
-        }
-    }
 
 
     input:
 
     tuple path(bams), path(index)
+    tuple val(spike_name), path(spike_genome)
 
+    
+    publishDir "${params.base_out_dir}/no_bl_filt/bed_graphs_deeptools/spike_in${spike_name}", mode: 'copy', pattern: '*'
+
+    // if (params.PE) {
+    //     publishDir "./results_PE/no_bl_filt/bed_graphs_deeptools/spike_in${spike_name}", mode: 'copy', pattern: '*'
+    // }
+    // if (params.SE) {
+    //     publishDir "./results_SE/no_bl_filt/bed_graphs_deeptools/spike_in${spike_name}", mode: 'copy', pattern: '*'
+    // }
 
     output:
     path("${out_bed_name}*"), emit: bed_files_normalized
 
     script:
 
-    out_bed_name="${bams.baseName}_normalized_cpm.bed"
+    out_bed_name="${bams.baseName}${spike_name}_normalized_cpm.bed"
 
     if (params.use_effectiveGenomeSize) {
 
@@ -690,7 +671,7 @@ process deeptools_make_bed_spike_in {
     """*/
 }
 
-// not doing black list filter for spike in
+// not doing black list filter for spike in. cant find blacklist for t7, yeast, or lambda
 /*
 process bedtools_filt_blacklist_spike_in {
 
@@ -698,15 +679,15 @@ process bedtools_filt_blacklist_spike_in {
 
     //publishDir './blacklist_filt_bam', mode: 'copy', pattern: '*.bam'
 
-    if (params.PE) {
+    // if (params.PE) {
 
-        publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*.bam'
+    //     publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*.bam'
     
-    }
-    else {
+    // }
+    // else {
 
-        publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*.bam'    
-    }
+    //     publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*.bam'    
+    // }
 
     input:
 
@@ -821,19 +802,24 @@ process fastp_PE_spike_in {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './results_PE/fastp_pe_results/filt_fastqs/spike_in', mode: 'copy', pattern: '*_filt_{R1,R2}*'
-
-    publishDir './results_PE/fastp_pe_results/merged_filt_fastqs/spike_in', mode: 'copy', pattern: '*_merged*'
-
-    publishDir './results_PE/fastp_pe_results/failed_qc_reads/spike_in', mode: 'copy', pattern: '*_failed_filter*'
-
-    publishDir './results_PE/fastp_pe_results/htmls/spike_in', mode: 'copy', pattern: '*fastp.html'
-
-
     input:
 
     tuple val(fastq_name), path(fastq)
+    tuple val(spike_name), path(spike_genome)
 
+    publishDir "${params.base_out_dir}/fastp_pe_results/filt_fastqs/spike_in${spike_name}", mode: 'copy', pattern: '*_filt_{R1,R2}*'
+
+    publishDir "${params.base_out_dir}/fastp_pe_results/merged_filt_fastqs/spike_in${spike_name}", mode: 'copy', pattern: '*_merged*'
+
+    publishDir "${params.base_out_dir}/fastp_pe_results/failed_qc_reads/spike_in${spike_name}", mode: 'copy', pattern: '*_failed_filter*'
+
+    publishDir "${params.base_out_dir}/fastp_pe_results/htmls/spike_in${spike_name}", mode: 'copy', pattern: '*fastp.html'
+
+
+    // input:
+
+    // tuple val(fastq_name), path(fastq)
+    // tuple val(spike_name), path(spike_genome)
 
     output:
 
@@ -845,11 +831,11 @@ process fastp_PE_spike_in {
 
     script:
 
-    out_name_1 = "${fastq_name}_filt_R1_0.fastq"
-    out_name_2 = "${fastq_name}_filt_R2_0.fastq"
-    failed_reads_file = "${fastq_name}_failed_filter_reads.fastq"
-    merged_reads_file = "${fastq_name}_merged_file_reads.fastq"
-    html_file_name = "${fastq_name}_R1_R2_fastp.html"
+    out_name_1 = "${fastq_name}${spike_name}_filt_R1_0.fastq"
+    out_name_2 = "${fastq_name}${spike_name}_filt_R2_0.fastq"
+    failed_reads_file = "${fastq_name}${spike_name}_failed_filter_reads.fastq"
+    merged_reads_file = "${fastq_name}${spike_name}_merged_file_reads.fastq"
+    html_file_name = "${fastq_name}${spike_name}_R1_R2_fastp.html"
 
     """
     #!/usr/bin/env bash
@@ -919,12 +905,14 @@ process fastqc_PE_spike_in {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
 
-    publishDir './results_PE/fastqc_pe_files/spike_in', mode: 'copy', pattern: '*'
+    // publishDir "./results_PE/fastqc_pe_files/spike_in${spike_name}", mode: 'copy', pattern: '*'
 
     input:
    
     tuple val(fastq_name), path(filt_r1), path(filt_r2)
+    tuple val(spike_name), path(spike_genome)
 
+    publishDir "${params.base_out_dir}/fastqc_pe_files/spike_in${spike_name}", mode: 'copy', pattern: '*'
 
     output:
 
@@ -965,12 +953,14 @@ process multiqc_PE_spike_in {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
 
-    publishDir './results_PE/multiqc_PE_output/spike_in', mode: 'copy', pattern: '*'
+    // publishDir "./results_PE/multiqc_PE_output/spike_in${spike_name}", mode: 'copy', pattern: '*'
 
 
     input:
     path(fastqc_zip_files)
+    tuple val(spike_name), path(spike_genome)
 
+    publishDir "${params.base_out_dir}/multiqc_PE_output/spike_in${spike_name}", mode: 'copy', pattern: '*'
 
     output:
 
@@ -1015,28 +1005,19 @@ process bwa_PE_aln_spike_in {
     //publishDir './results_PE/pe_bwa_files/pe_sai_index_files/spike_in', mode: 'copy', pattern: '*.sai'
     //cache false 
 
-    if (params.gloe_seq) {
+    // publishDir "./results_PE/pe_bwa_files/pe_sam_files/spike_in/sam${spike_name}", mode: 'copy', pattern: '*.sam'
+    // publishDir "./results_PE/pe_bwa_files/pe_sai_index_files/spike_in/sai${spike_name}", mode: 'copy', pattern: '*.sai'
 
-        publishDir './results_PE/pe_bwa_files/pe_sam_files/spike_in/t7_sam', mode: 'copy', pattern: '*.sam'
-        publishDir './results_PE/pe_bwa_files/pe_sai_index_files/spike_in/t7_sai', mode: 'copy', pattern: '*.sai'
-
-    }
-    else if (params.end_seq) {
-
-        publishDir './results_PE/pe_bwa_files/pe_sam_files/spike_in/lambda_sam', mode: 'copy', pattern: '*.sam'
-        publishDir './results_PE/pe_bwa_files/pe_sai_index_files/spike_in/lambda_sai', mode: 'copy', pattern: '*.sai'
-    }
-    else if (params.ricc_seq) {
-
-        publishDir './results_PE/pe_bwa_files/pe_sam_files/spike_in/yeast_sam', mode: 'copy', pattern: '*.sam'
-        publishDir './results_PE/pe_bwa_files/pe_sai_index_files/spike_in/yeast_sai', mode: 'copy', pattern: '*.sai'
-    }
+    
 
     input:
     tuple val(filt_fastq_name), path(fastq_r1), path(fastq_r2)
-    path(genome)
+    //path(genome)
     path(genome_index)
+    tuple val(spike_name), path(genome)
 
+    publishDir "${params.base_out_dir}/pe_bwa_files/pe_sam_files/spike_in/sam${spike_name}", mode: 'copy', pattern: '*.sam'
+    publishDir "${params.base_out_dir}/pe_bwa_files/pe_sai_index_files/spike_in/sai${spike_name}", mode: 'copy', pattern: '*.sai'
 
     output:
 
@@ -1047,10 +1028,10 @@ process bwa_PE_aln_spike_in {
 
     script:
 
-    sai_out_file_r1 = "${filt_fastq_name}_filt_r1.sai"
-    sai_out_file_r2 = "${filt_fastq_name}_filt_r2.sai"
+    sai_out_file_r1 = "${filt_fastq_name}${spike_name}_filt_r1.sai"
+    sai_out_file_r2 = "${filt_fastq_name}${spike_name}_filt_r2.sai"
 
-    out_sam_file = "${filt_fastq_name}_filt_r1_r2.sam"
+    out_sam_file = "${filt_fastq_name}${spike_name}_filt_r1_r2.sam"
 
 
     """
@@ -1154,27 +1135,93 @@ process multiqc_bam_stats_spike_in {
     
 }*/
 
-/*
+
+
+
+// samtools_index_sort_spike_in copied from the original but adding a sub dir for gloe_seq, end_seq and ricc_seq
+
+process samtools_index_sort_spike_in {
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj'
+
+    //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
+
+    // not doing blacklist filter for spike_ins
+
+    
+
+    input:
+    path(bam) // changed this to be just bam
+    tuple val(spike_name), path(spike_genome)
+
+
+     
+    publishDir "${params.base_out_dir}/ATAC_filt_bam/spike_in${spike_name}_bam", mode: 'copy', pattern: '*.{bam,bai}'
+
+    // if (params.PE) {
+
+    //     publishDir "./results_PE/ATAC_filt_bam/spike_in${spike_name}_bam", mode: 'copy', pattern: '*.{bam,bai}'
+
+    // }
+    // if (params.SE) {
+    //     publishDir "./results_SE/ATAC_filt_bam/spike_in${spike_name}_bam", mode: 'copy', pattern: '*.{bam,bai}'
+    // }
+
+    output:
+
+    tuple path("${out_bam_name_sort}"), path("*.bai"), emit: bam_index_tuple
+    
+    
+
+    script:
+    
+    out_bam_name_sort = "${bam.baseName}${spike_name}_sort2.bam"
+
+    """
+    ####### parameters for indexing bam ######
+    # -b : will create a bai file
+
+    ##########################################
+
+    # just do some sorting 
+
+    samtools sort \
+    -o "${out_bam_name_sort}" \
+    -O bam \
+    "${bam}"
+
+
+
+    samtools index \
+    -b \
+    "${out_bam_name_sort}" 
+
+    """
+}
+
 process deeptools_aln_shift_spike_in {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/deeptools_rj'
 
-    if (params.PE) {
+    // commenting the publish dir here out since the samtools_index_sort_spike_in will have the bam and it will be sorted anyway
+    /*if (params.PE) {
 
         publishDir './results_PE/atac_shift_bam', mode: 'copy', pattern: '*shift.bam'
     }
     else {
 
         publishDir './results_SE/atac_shift_bam', mode: 'copy', pattern: '*shift.bam'
-    }
+    }*/
 
 
     input:
     tuple path(bam), path(index)
+    tuple val(spike_name), path(spike_genome)
 
+    // not using this dir because a different dir will have the bam and it will be sorted.
+    //publishDir = "${params.base_out_dir}/atac_shift_bam/spike_in${spike_name}", mode: 'copy', pattern: '*shift.bam'
 
     output:
-    tuple path("*shift.bam"), emit: atac_shifted_bam
+    path("*shift.bam"), emit: atac_shifted_bam
 
 
     script:
@@ -1199,5 +1246,4 @@ process deeptools_aln_shift_spike_in {
 
 
     """
-}*/
-
+}
