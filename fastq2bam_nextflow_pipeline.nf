@@ -72,6 +72,7 @@ workflow {
     // i will use a path already in the hpc as the defualt human genome but the user can change the genome by using -genome parameter and putting the path to a new genome in the command line when calling nextflow run
     params.genome = file('/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg19/genome/Sequence/Bowtie2Index/genome.fa')
 
+    // this is the path to hg38 /rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg38/genome/Sequence/WholeGenomeFasta/genome.fa
     // putting the human genome in a channel
     // keeping the human genome in a value channel so i can have other processes run more than once.
     genome_ch = Channel.value(params.genome)
@@ -679,13 +680,22 @@ workflow {
 
     // I want to make a log file with all the stats from using samtools stats on each bam file
 
+    //tsv_SN_stats_ch.view{"These are the tsv files $it"}
+    tsv_SN_stats_ch
+        .map{ file -> tuple(file.baseName, file)}
+        .set{tsv_SN_stats_tuple_ch}
+        //.view {"These are the files with their basenames in a tuple transposed: $it"} // i dont need this transposed, i want all the files and names
+        
+    //tsv_SN_stats_tuple_ch.view{"These are the files with their basenames in a tuple: $it"}
+
+
     if (params.PE) {
 
-        //py_calc_stats_log(tsv_SN_stats_ch)
+        py_calc_stats_log(tsv_SN_stats_tuple_ch)
     }
     if (params.SE) {
 
-        //py_calc_stats_log(tsv_SN_stats_ch)
+        py_calc_stats_log(tsv_SN_stats_tuple_ch)
 
     }
 

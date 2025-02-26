@@ -5,8 +5,8 @@ process fastp_SE_adapter_known {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './results_SE/fastp_qc_single_end', mode: 'copy', pattern:'*_fp_filt.fastq'
-    publishDir './results_SE/fastp_qc_single_end/html_reports', mode: 'copy', pattern:'*.html'
+    publishDir "${params.base_out_dir}/fastp_qc_single_end", mode: 'copy', pattern:'*_fp_filt.fastq'
+    publishDir "${params.base_out_dir}/fastp_qc_single_end/html_reports", mode: 'copy', pattern:'*.html'
 
     input:
     // input names dont have to be the exact same as what is seen in the workflow section of this script
@@ -85,8 +85,8 @@ process fastp_SE {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './results_SE/fastp_qc_single_end', mode: 'copy', pattern:'*_fp_filt.fastq'
-    publishDir './results_SE/fastp_qc_single_end/html_reports', mode: 'copy', pattern:'*.html'
+    publishDir "${params.base_out_dir}/fastp_qc_single_end", mode: 'copy', pattern:'*_fp_filt.fastq'
+    publishDir "${params.base_out_dir}/fastp_qc_single_end/html_reports", mode: 'copy', pattern:'*.html'
 
     input:
     // input names dont have to be the exact same as what is seen in the workflow section of this script
@@ -156,7 +156,7 @@ process fastp_SE {
 process fastqc_SE {
     // using the conda environment 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
-    publishDir './results_SE/fastqc_htmls', mode: 'copy', pattern: '*.html'
+    publishDir "${params.base_out_dir}/fastqc_htmls", mode: 'copy', pattern: '*.html'
 
 
     input:
@@ -191,7 +191,7 @@ process multiqc_SE {
 
     //conda '/ru-auth/local/home/rjohnson/miniconda3/envs/multiqc_rj'
     
-    publishDir './results_SE/multiQC_collection', mode: 'copy', pattern: '*.html'
+    publishDir "${params.base_out_dir}/multiQC_collection", mode: 'copy', pattern: '*.html'
 
     input:
     path(fastp_filt_html)
@@ -271,8 +271,8 @@ process bwa_index_genome {
 process bwa_align_SE {
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
-    publishDir './results_SE/bwa_outputs_singleEnd_SAM', mode: 'copy', pattern: '*.sam'
-    publishDir './results_SE/sai_alignment_files', mode: 'copy', pattern: '*.sai'
+    publishDir "${params.base_out_dir}/bwa_outputs_singleEnd_SAM", mode: 'copy', pattern: '*.sam'
+    publishDir "${params.base_out_dir}/sai_alignment_files", mode: 'copy', pattern: '*.sai'
 
 
     input:
@@ -325,241 +325,7 @@ process bwa_align_SE {
     """
 }
 
-/*process samtools_sort {
-    // using the conda yml file for samtools
-    // it doesnt work
-    //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools_rj_env.yml'
 
-    //conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj' // this was samtools version 1.3 which doesnt have samtools fixmate option -m
-
-    //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/samtools-1.21_spec_env_rj.txt' // that is the explicit file but if that doesnt work try the yml file samtools-1.21_env_rj.yml; and if that doesnt work use the path to the 1.21 environment
-
-    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools-1.21_rj'
-
-
-    if (params.PE) {
-
-        publishDir './results_PE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './results_PE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
-        publishDir './results_PE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
-        publishDir './results_PE/stats_tsv_files', mode: 'copy', pattern: '*stats.tsv'
-
-    }
-
-    else if(params.SE) {
-
-        publishDir './results_SE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './results_SE/indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
-        publishDir './results_SE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
-        publishDir './results_SE/stats_tsv_files', mode: 'copy', pattern: '*stats.tsv'
-
-    }
-    //publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-    //publishDir './indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
-    //publishDir './flag_stat_log', mode: 'copy', pattern: '*stat.log'
-
-    input:
-    path(sam_files)
-
-
-    output:
-
-    path("*_sorted.bam"), emit: sorted_bams
-    //tuple path("*.{bai,csi}"), emit: indexed_bams
-    //tuple path("*.bai"), path("*.csi"), emit: indexed_bams
-    path("*.bai"), emit: indexed_bams
-    tuple path("*_sorted.bam"), path("*.bai"), emit: bam_index_tuple
-
-    path("*stats.log"), emit: flag_stats_log
-    path("*stats.txt"), emit: norm_stats_txt
-    path("*stats.tsv"), emit: tsv_SN_stats
-
-    script:
-
-    // i will start using baseName inside the process since its easier to keep track of different names an uses less inputs into a process
-    out_bam_filt = "${sam_files.baseName}_bam_filt.bam"
-    out_bam_name_sort = "${sam_files.baseName}_name_ordered.bam"
-    out_bam_coor_sort = "${sam_files.baseName}_filt_coor_sorted.bam"
-    out_bam_fixmate = "${sam_files.baseName}_fixmate.bam"
-    out_bam_final = "${sam_files.baseName}_markdup_filt_coor_sorted.bam"
-    flagstats_log_pe = "${sam_files.baseName}_pair_end_stats.log"
-    samtools_stats_log_pe = "${sam_files.baseName}_pe_stats.txt"
-    tsv_file_with_stats_pe = "${sam_files.baseName}_pe_SN_stats.tsv"
-
-    out_bam_se_filt = "${sam_files.baseName}_se_file.bam"
-    out_bam_coor_sort_se = "${sam_files.baseName}_se_file_coor_sorted.bam"
-    flagstats_log_se = "${sam_files.baseName}_single_end_stats.log"
-    samtools_stats_log_se = "${sam_files.baseName}_se_stats.txt"
-    tsv_file_with_stats_se = "${sam_files.baseName}_se_SN_stats.tsv"
-
-    if (params.PE) {
-
-        """
-        #!/usr/bin/env bash
-
-        ################# samtools parameters used ################
-        # for samtools view
-        # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
-        # --bam or -b : output in the bam format
-        # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
-
-        # for samtools sort
-        # -o : takes a file. it writes the final sorted output to file rather than standard output
-        # -O : write the final output as sam, bam, or cram
-
-        # samtools fixmate : preparing for finding the duplicates
-        # -O : specify the format and i choose bam
-        # -m : add ms(mate score) tags. these are used by markdup to select the best reads to keep 
-        # other possible option to look at is -r : remove secondary and unmapped reads ?
-        
-        # for samtools markdup : can only be done on coordinate sorted bam files and run it through samtools fixmate first
-        # -r : remove duplicate reads
-        # --mode or -m : duplicate decision method for paired reads. values are "t" or "s". read documentation but i choose s becasue it tends to return more results. just incase i will remove this option in the pair end mode by adding an if else statement in this process.
-
-        # now for samtools index to get index files
-        # -b, --bai: create a bai index; this version of samtools does not support --bai --csi just use -b -c
-        # -c, --csi: create a csi index
-        # -o, --output: write the output index to a file specified  only when one alignment file is being indexed
-
-        # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
-        # no parameters needed. just need to give the final bam file that went through all the processing
-        ###########################################################
-
-        # I should add a samtools filtering. looking to only get mapq scores higher than 30
-
-        samtools view \
-        -q 30 \
-        -b \
-        "${sam_files}" \
-        > "${out_bam_filt}" 
-        
-        
-        # first i have to name sort to use fixmate
-        samtools sort \
-        -o "${out_bam_name_sort}" \
-        -n \
-        -O bam \
-        "${out_bam_filt}"
-
-
-        samtools fixmate \
-        -O bam \
-        -m \
-        "${out_bam_name_sort}"\
-        "${out_bam_fixmate}"
-
-
-        # now i will coordinate sort here 
-        samtools sort \
-        -o "${out_bam_coor_sort}" \
-        -O bam \
-        "${out_bam_fixmate}"
-
-
-        # i might need to put coordinate sorted bam into markdup
-        # this works but removing the duplicates results in the file being very small meaning too many reads were removed that were considered duplicates.
-        # this results in the next process deeptools not being able to create a normalized bedgraph file
-
-        #samtools markdup \
-        #"\${out_bam_coor_sort}" \
-        #"\${out_bam_final}"
-
-        # so i will just use the out file from the coordinate sort samtools sort section instead of using out_bam_final
-        samtools index \
-        -b \
-        "${out_bam_coor_sort}"
-
-        samtools flagstat \
-        "${out_bam_coor_sort}" \
-        > "${flagstats_log_pe}"
-
-        # adding another way to get stats from each bam file
-        samtools stats \
-        "${out_bam_coor_sort}" \
-        > "${samtools_stats_log_pe}"
-
-        # now only putting the stats into a tsv file
-        less "${samtools_stats_log_pe}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats_pe}"
-        """
-
-
-
-    }
-    else if (params.SE) {
-
-        """
-        #!/usr/bin/env bash
-
-        ################# samtools parameters used ################
-        # for samtools view
-        # --min-MQ or -q : takes an INT and will skip alignments with a MAPQ smaller than INT
-        # --bam or -b : output in the bam format
-        # this version of bwa didnt recognize --bam or --min-MQ so i just used -b and -q respetively.
-
-        # for samtools sort
-        # -o : takes a file. it writes the final sorted output to file rather than standard output
-        # -O : write the final output as sam, bam, or cram
-
-        # samtools fixmate : preparing for finding the duplicates
-        # -O : specify the format and i choose bam
-        # -m : add ms(mate score) tags. these are used by markdup to select the best reads to keep 
-        # other possible option to look at is -r : remove secondary and unmapped reads ?
-        
-        # for samtools markdup : can only be done on coordinate sorted bam files and run it through samtools fixmate first
-        # -r : remove duplicate reads
-        # --mode or -m : duplicate decision method for paired reads. values are "t" or "s". read documentation but i choose s becasue it tends to return more results. just incase i will remove this option in the pair end mode by adding an if else statement in this process.
-
-        # now for samtools index to get index files
-        # -b, --bai: create a bai index; this version of samtools does not support --bai --csi just use -b -c
-        # -c, --csi: create a csi index
-        # -o, --output: write the output index to a file specified  only when one alignment file is being indexed
-
-        # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
-        # no parameters needed. just need to give the final bam file that went through all the processing
-
-
-        ###########################################################
-
-        # I should add a samtools filtering. looking to only get mapq scores higher than 30
-
-        samtools view \
-        -q 30 \
-        -b \
-        "${sam_files}" \
-        > "${out_bam_se_filt}" 
-        
-
-
-
-        # now i will coordinate sort here 
-        samtools sort \
-        -o "${out_bam_coor_sort_se}" \
-        -O bam \
-        "${out_bam_se_filt}"
-
-
-        # so i will just use the out file from the coordinate sort samtools sort section instead of using out_bam_final
-        samtools index \
-        -b \
-        "${out_bam_coor_sort_se}"
-
-        samtools flagstat \
-        "${out_bam_coor_sort_se}" \
-        > "${flagstats_log_se}"
-
-        # adding another way to get stats from each bam file
-        samtools stats \
-        "${out_bam_coor_sort}" \
-        > "${samtools_stats_log_se}"
-
-        # now only putting the stats into a tsv file
-        less "${samtools_stats_log_se}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats_se}"
-        """
-
-    }
-
-    
-}*/
 
 
 process samtools_sort {
@@ -574,23 +340,16 @@ process samtools_sort {
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools-1.21_rj'
 
 
-    if (params.PE) {
+    
 
-        publishDir './results_PE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './results_PE/sorted_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
-        publishDir './results_PE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
-        publishDir './results_PE/stats_tsv_files', mode: 'copy', pattern: '*stats.tsv'
+    publishDir "${params.base_out_dir}/sorted_bam_files", mode: 'copy', pattern: '*_sorted.bam'
+    publishDir "${params.base_out_dir}/sorted_bam_files", mode: 'copy', pattern: '*.{bai, csi}'
+    publishDir "${params.base_out_dir}/flag_stat_log", mode: 'copy', pattern: '*stats.log'
+    publishDir "${params.base_out_dir}/stats_tsv_files", mode: 'copy', pattern: '*stats.tsv'
 
-    }
+    
 
-    else if(params.SE) {
-
-        publishDir './results_SE/sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
-        publishDir './results_SE/sorted_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
-        publishDir './results_SE/flag_stat_log', mode: 'copy', pattern: '*stats.log'
-        publishDir './results_SE/stats_tsv_files', mode: 'copy', pattern: '*stats.tsv'
-
-    }
+    
     //publishDir './sorted_bam_files', mode: 'copy', pattern: '*_sorted.bam'
     //publishDir './indexed_bam_files', mode: 'copy', pattern: '*.{bai, csi}'
     //publishDir './flag_stat_log', mode: 'copy', pattern: '*stat.log'
@@ -730,29 +489,18 @@ process deeptools_make_bed {
 
     // this section is just a simple if else statement controlling the directories that are created and when the files end up
     // will copy and paste in other processes that need it.
-    if (params.PE) {
-
-        if (params.BL) {
-
-            publishDir './results_PE/bl_filt_bed/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
-
-        }
-        else {
-            publishDir './results_PE/no_bl_filt/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
-        }
     
+
+    if (params.BL) {
+
+        publishDir "${params.base_out_dir}/bl_filt_bed/bed_graphs_deeptools/", mode: 'copy', pattern: '*'
+
     }
     else {
-
-        if (params.BL) {
-
-            publishDir './results_SE/bl_filt_bed/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
-
-        }
-        else {
-            publishDir './results_SE/no_bl_filt/bed_graphs_deeptools/', mode: 'copy', pattern: '*'
-        }
+        publishDir "${params.base_out_dir}/no_bl_filt/bed_graphs_deeptools/", mode: 'copy', pattern: '*'
     }
+    
+    
 
 
     input:
@@ -828,15 +576,11 @@ process bedtools_filt_blacklist {
 
     //publishDir './blacklist_filt_bam', mode: 'copy', pattern: '*.bam'
 
-    if (params.PE) {
-
-        publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*.bam'
     
-    }
-    else {
-
-        publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*.bam'    
-    }
+    // dont need to publish this since the samtools_bl_index will publish the sorted 2 version of the bam
+    //publishDir "${params.base_out_dir}/blacklist_filt_bam", mode: 'copy', pattern: '*.bam'
+    
+    
 
     input:
 
@@ -875,39 +619,24 @@ process samtools_bl_index {
     
 
     //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
-    if (params.PE) {
+   
 
-        if (params.ATAC) {
+    // if (params.ATAC) {
 
-            publishDir './results_PE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
-            publishDir './results_PE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
+    //     publishDir "${params.base_out_dir}/ATAC_blacklist_filt_bam", mode: 'copy', pattern: '*.bai'
+    //     publishDir "${params.base_out_dir}/ATAC_blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
 
-        }
-        else {
+    // }
+    // else {
 
-            publishDir './results_PE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
-            publishDir './results_PE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
-        }
+    //     publishDir "${params.base_out_dir}/blacklist_filt_bam", mode: 'copy', pattern: '*.bai'
+    //     publishDir "${params.base_out_dir}/blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
+    // }
 
-       
+    publishDir "${params.base_out_dir}/blacklist_filt_bam", mode: 'copy', pattern: '*.bai'
+    publishDir "${params.base_out_dir}/blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
     
-    }
-    else {
-
-        if (params.ATAC) {
-
-            publishDir './results_SE/ATAC_blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
-            publishDir './results_SE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
-
-        }
-        else {
-
-            publishDir './results_SE/blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern: '*.bai'
-            publishDir './results_SE/blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
-        }
-
-          
-    }
+    
 
     input:
     path(bl_filt_bam)
@@ -948,13 +677,13 @@ process fastp_PE {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/fastp_rj'
 
-    publishDir './results_PE/fastp_pe_results/filt_fastqs', mode: 'copy', pattern: '*_filt_{R1,R2}*'
+    publishDir "${params.base_out_dir}/fastp_pe_results/filt_fastqs", mode: 'copy', pattern: '*_filt_{R1,R2}*'
 
-    publishDir './results_PE/fastp_pe_results/merged_filt_fastqs', mode: 'copy', pattern: '*_merged*'
+    publishDir "${params.base_out_dir}/fastp_pe_results/merged_filt_fastqs", mode: 'copy', pattern: '*_merged*'
 
-    publishDir './results_PE/fastp_pe_results/failed_qc_reads', mode: 'copy', pattern: '*_failed_filter*'
+    publishDir "${params.base_out_dir}/fastp_pe_results/failed_qc_reads", mode: 'copy', pattern: '*_failed_filter*'
 
-    publishDir './results_PE/fastp_pe_results/htmls', mode: 'copy', pattern: '*fastp.html'
+    publishDir "${params.base_out_dir}/fastp_pe_results/htmls", mode: 'copy', pattern: '*fastp.html'
 
 
     input:
@@ -1044,7 +773,7 @@ process fastqc_PE {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/fastqc_rj_env.yml'
 
-    publishDir './results_PE/fastqc_pe_files', mode: 'copy', pattern: '*'
+    publishDir "${params.base_out_dir}/fastqc_pe_files", mode: 'copy', pattern: '*'
 
     input:
    
@@ -1088,7 +817,7 @@ process multiqc_PE {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
 
-    publishDir './results_PE/multiqc_PE_output', mode: 'copy', pattern: '*'
+    publishDir "${params.base_out_dir}/multiqc_PE_output", mode: 'copy', pattern: '*'
 
 
     input:
@@ -1132,8 +861,8 @@ process bwa_PE_aln {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/bwa_rj_env.yml'
 
-    publishDir './results_PE/pe_bwa_files/pe_sam_files', mode: 'copy', pattern: '*.sam'
-    publishDir './results_PE/pe_bwa_files/pe_sai_index_files', mode: 'copy', pattern: '*.sai'
+    publishDir "${params.base_out_dir}/pe_bwa_files/pe_sam_files", mode: 'copy', pattern: '*.{sam, sai}'
+    //publishDir "${params.base_out_dir}/pe_bwa_files/pe_sai_index_files", mode: 'copy', pattern: '*.sai'
     //cache false 
 
 
@@ -1199,15 +928,12 @@ process multiqc_bam_stats {
 
     conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/multiqc_rj_env.yml'
 
-    if (params.PE) {
-
-        publishDir './results_PE/flag_stat_log/complete_log', mode: 'copy', pattern: '*.html'
     
-    }
-    else {
 
-        publishDir './results_SE/flag_sta_log/complete_log', mode: 'copy', pattern: '*.html'    
-    }
+    publishDir "${params.base_out_dir}/flag_stat_log/complete_log", mode: 'copy', pattern: '*.html'
+
+   
+    
 
     input:
 
@@ -1327,39 +1053,24 @@ process samtools_index_sort {
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools_rj'
 
     //publishDir './blacklist_filt_bam/bl_filt_index', mode: 'copy', pattern:'*.bai'
-    if (params.PE) {
-
-        if (params.ATAC && params.BL) {
-            // I want to put both the bam and the index (bai) in the same channel
-            publishDir './results_PE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*.bai'
-            publishDir './results_PE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
-
-        }
-        else if(params.ATAC) {
-
-            publishDir './results_PE/ATAC_filt_bam', mode: 'copy', pattern: '*.bai'
-            publishDir './results_PE/ATAC_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
-        }
-
-       
     
+
+    if (params.ATAC && params.BL) {
+        // I want to put both the bam and the index (bai) in the same channel
+        publishDir "${params.base_out_dir}/ATAC_blacklist_filt_bam", mode: 'copy', pattern: '*.bai'
+        publishDir "${params.base_out_dir}/ATAC_blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
+
     }
-    else if (params.SE) {
+    else if(params.ATAC) {
 
-        if (params.ATAC && params.BL) {
+        publishDir "${params.base_out_dir}/ATAC_filt_bam", mode: 'copy', pattern: '*.bai'
+        publishDir "${params.base_out_dir}/ATAC_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
+    }
 
-            publishDir './results_SE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*.bai'
-            publishDir './results_SE/ATAC_blacklist_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
 
-        }
-        else if (params.ATAC) {
-
-            publishDir './results_SE/ATAC_filt_bam', mode: 'copy', pattern: '*.bai'
-            publishDir './results_SE/ATAC_filt_bam', mode: 'copy', pattern: '*_sort2.bam'
-        }
 
           
-    }
+    
 
     input:
     path(bam) // changed this to be just bam
@@ -1405,8 +1116,8 @@ process mk_break_points {
 
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/bedtools_rj'
 
-    publishDir './results_PE/break_point_bed', mode: 'copy', pattern: '*_breaks.bed'
-    publishDir './results_PE/'
+    publishDir "${params.base_out_dir}/break_point_bed", mode: 'copy', pattern: '*_breaks.bed'
+    //publishDir './results_PE/'
 
     input:
     // take the bam files either bl filtered or not bl filtered from only the pair end path
@@ -1471,7 +1182,7 @@ process mk_break_points {
 
 process breakDensityWrapper_process {
 
-    publishDir './break_density_calc', mode: 'copy', pattern: '*'
+    publishDir "${params.base_out_dir}/break_density_calc", mode: 'copy', pattern: '*'
     
 
     input:
@@ -1517,84 +1228,64 @@ process breakDensityWrapper_process {
 
 process py_calc_stats_log {
 
+    //debug true
+
+    //conda '/lustre/fs4/home/rjohnson/conda_env_files_rj_test/python_w_packages_rj_env.yml'
+
     conda '/ru-auth/local/home/rjohnson/miniconda3/envs/python_w_packages_rj'
 
-    if (params.PE) {
+    //shell '/bin/python3'
 
-        publishDir '.', mode: 'copy', pattern: '*.tsv'
-    }
+    publishDir "${params.base_out_dir}/py_calc_stats_log", mode: 'copy', pattern: '*.tsv'
+
 
     input:
-    path(tsv_sn_stats)
+    tuple val(tsv_names), path(tsv_sn_stats)
 
 
     output:
 
-    path("pe_*.tsv"), emit: pe_tsv_log
-    path("se_*.tsv"), emit: se_tsv_log
+    path("bam_*.tsv"), emit: pe_tsv_log
+    
     
 
 
     script:
 
-    name_of_file = "${tsv_sn_stats*.baseName.join("")}"
-    pe_log_file_out = "pe_bam_stats_log.tsv"
-    se_log_file_out = "se_bam_stats_log.tsv"
+    
 
-    if (params.PE) {
+    name_of_file = "${tsv_names}"
+    //pe_log_file_out = "pe_bam_stats_log.tsv"
+    //se_log_file_out = "se_bam_stats_log.tsv"
+    log_file_out = "bam_stats_log.tsv"
+
+    """
+    #!/usr/bin/env python
+           
+
+    import pandas as pd
+
+    list_tsv_files = "${tsv_sn_stats}".split()
+    list_of_names = "${name_of_file}".split()
+
+    files_dict_df = {}
+
+    for name, file in zip(list_of_names, list_tsv_files):
+        files_dict_df[name] = pd.read_table(file, header=None, sep='\t').set_index(0).T
+
+    # concat the dictionary of dataframes
+    combined_stats_df = pd.concat( files_dict_df.values(), axis = 0)
+
+    # now  putting sample names in the df
+    combined_stats_df.insert(0, "sample_names", files_dict_df.keys())
+
+    # writing the tsv
+    combined_stats_df.to_csv("${log_file_out}", sep = '\t')
 
     
-        """
-        #!/usr/bin/env python3
+   
+    
+    """
 
-        import pandas as pd
-
-        list_tsv_files = "${tsv_sn_stats}".split()
-        list_of_names = "${name_of_file}".split()
-
-        files_dict_df = {}
-
-        for name, file in zip(list_of_names, list_tsv_files):
-            files_dict_df[name] = pd.read_table(file, header=None, sep='\t').set_index(0).T
-
-        # concat the dictionary of dataframes
-        combined_stats_df = pd.concat( files_dict_df.values(), axis = 0)
-
-        # now  putting sample names in the df
-        combined_stats_df.insert(0, "sample_names", files_dict_df.keys())
-
-        # writing the tsv
-        combined_stats_df.to_csv("${pe_log_file_out}", sep = '\t')
-
-        """
-    }
-
-    if (params.SE) {
-
-        """
-        #!/usr/bin/env python3
-
-        import pandas as pd
-
-        list_tsv_files = "${tsv_sn_stats}"
-        list_of_names = "${name_of_file}"
-
-        files_dict_df = {}
-
-        for name, file in zip(list_of_names, list_tsv_files):
-            files_dict_df[name] = pd.read_table(file, header=None, sep='/\t').set_index(0).T
-
-        # concat the dictionary of dataframes
-        combined_stats_df = pd.concat( files_dict_df.values(), axis = 0)
-
-        # now  putting sample names in the df
-        combined_stats_df.insert(0, "sample_names", files_dict_df.keys())
-
-        # writing the tsv
-        combined_stats_df.to_csv("${pe_log_file_out}", sep = '/\t')
-
-        """
-
-    }
 }
 
