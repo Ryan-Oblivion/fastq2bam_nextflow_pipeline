@@ -393,8 +393,8 @@ process samtools_sort_spike_in {
 
     publishDir "${params.base_out_dir}/sorted_bam_files/spike_in${spike_name}", mode: 'copy', pattern: '*_sorted.bam'
     publishDir "${params.base_out_dir}/sorted_bam_files/spike_in${spike_name}", mode: 'copy', pattern: '*.{bai, csi}'
-    publishDir "${params.base_out_dir}/flag_stat_log/spike_in${spike_name}", mode: 'copy', pattern: '*stats.log'
-    publishDir "${params.base_out_dir}/stats_tsv_files/spike_in${spike_name}", mode: 'copy', pattern: '*stats.tsv'
+    // publishDir "${params.base_out_dir}/flag_stat_log/spike_in${spike_name}", mode: 'copy', pattern: '*stats.log'
+    // publishDir "${params.base_out_dir}/stats_tsv_files/spike_in${spike_name}", mode: 'copy', pattern: '*stats.tsv'
 
     // Determine the base directory (PE/SE) first
     // if (params.PE) {
@@ -433,9 +433,9 @@ process samtools_sort_spike_in {
     path("*.bai"), emit: indexed_bams
     tuple path("*_sorted.bam"), path("*.bai"), emit: bam_index_tuple
 
-    path("*stats.log"), emit: flag_stats_log
-    path("*stats.txt"), emit: norm_stats_txt
-    path("*stats.tsv"), emit: tsv_SN_stats
+    // path("*stats.log"), emit: flag_stats_log
+    // path("*stats.txt"), emit: norm_stats_txt
+    // path("*stats.tsv"), emit: tsv_SN_stats
 
     script:
 
@@ -444,10 +444,10 @@ process samtools_sort_spike_in {
     out_bam_name_sort = "${sam_files.baseName}_name_ordered.bam"
     out_bam_coor_sort = "${sam_files.baseName}_filt_coor_sorted.bam"
     out_bam_fixmate = "${sam_files.baseName}_fixmate.bam"
-    out_bam_final = "${sam_files.baseName}_markdup_filt_coor_sorted.bam"
-    flagstats_log = "${sam_files.baseName}_flag_stats.log"
-    samtools_stats_log = "${sam_files.baseName}_stats.txt"
-    tsv_file_with_stats = "${sam_files.baseName}_SN_stats.tsv"
+    // out_bam_final = "${sam_files.baseName}_markdup_filt_coor_sorted.bam"
+    // flagstats_log = "${sam_files.baseName}_flag_stats.log"
+    // samtools_stats_log = "${sam_files.baseName}_stats.txt"
+    // tsv_file_with_stats = "${sam_files.baseName}_SN_stats.tsv"
 
 
     
@@ -527,17 +527,17 @@ process samtools_sort_spike_in {
     -b \
     "${out_bam_coor_sort}"
 
-    samtools flagstat \
-    "${out_bam_coor_sort}" \
-    > "${flagstats_log}"
+    #samtools flagstat \
+    #"\${out_bam_coor_sort}" \
+    #> "\${flagstats_log}"
 
     # adding another way to get stats from each bam file
-    samtools stats \
-    "${out_bam_coor_sort}" \
-    > "${samtools_stats_log}"
+    #samtools stats \
+    #"\${out_bam_coor_sort}" \
+    #> "\${samtools_stats_log}"
 
     # now only putting the stats into a tsv file
-    less "${samtools_stats_log}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats}"
+    #less "\${samtools_stats_log}" | grep ^SN | cut -f 2-3 >  "\${tsv_file_with_stats}"
     """
 
 
@@ -546,6 +546,62 @@ process samtools_sort_spike_in {
 
     
 }
+
+
+// might not need this next process here
+/*
+process bam_log_calc_spike_in {
+
+    label 'normal_small_resources'
+
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools-1.21_rj'
+
+    publishDir "${params.base_out_dir}/flag_stat_log/spike_in${spike_name}", mode: 'copy', pattern: '*stats.log'
+    publishDir "${params.base_out_dir}/stats_tsv_files/spike_in${spike_name}", mode: 'copy', pattern: '*stats.tsv'
+
+
+    input:
+    tuple path(bam), path(index_bam)
+
+
+    output:
+    path("*stats.log"), emit: flag_stats_log
+    path("*stats.txt"), emit: norm_stats_txt
+    path("*stats.tsv"), emit: tsv_SN_stats
+
+
+
+    script:
+    flagstats_log = "${bam.baseName}_flag_stats.log"
+    samtools_stats_log = "${bam.baseName}_stats.txt"
+    tsv_file_with_stats = "${bam.baseName}_SN_stats.tsv"
+
+
+    """
+    #!/usr/bin/env bash
+
+    # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
+    # no parameters needed. just need to give the final bam file that went through all the processing
+
+
+    samtools flagstat \
+    "${bam}" \
+    > "${flagstats_log}"
+
+    # adding another way to get stats from each bam file
+    samtools stats \
+    "${bam}" \
+    > "${samtools_stats_log}"
+
+    # now only putting the stats into a tsv file
+    less "${samtools_stats_log}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats}"
+
+
+
+
+    """
+}
+*/
 
 
 
@@ -1155,7 +1211,7 @@ process samtools_index_sort_spike_in {
 
 
      
-    publishDir "${params.base_out_dir}/ATAC_filt_bam/spike_in${spike_name}_bam", mode: 'copy', pattern: '*.{bam,bai}'
+    publishDir "${params.base_out_dir}/sorted_bam_files/ATAC_filt_bam/spike_in${spike_name}_bam", mode: 'copy', pattern: '*.{bam,bai}'
 
     // if (params.PE) {
 

@@ -80,9 +80,7 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 --spike_in \
 --t7 \
 --lambda \
---yeast
-
-#--ATAC
+--ATAC
 
  
 

@@ -188,12 +188,13 @@ workflow pe_t7_spike_in_workflow {
 
     //samtools_sort_spike_in.out.bam_index_tuple.view()
 
+    /*
     flagstat_log_ch = samtools_sort_spike_in.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
     norm_stats_txt_ch = samtools_sort_spike_in.out.norm_stats_txt.collect()
     tsv_SN_stats_ch = samtools_sort_spike_in.out.tsv_SN_stats.collect()
-
+    */
     spike_in_bam_index_tuple_ch = samtools_sort_spike_in.out.bam_index_tuple
-
+    
 
 
     if (params.ATAC) {
@@ -239,7 +240,7 @@ workflow pe_t7_spike_in_workflow {
     }
 
 
-
+    
 
 }
 
@@ -375,11 +376,11 @@ workflow pe_lambda_spike_in_workflow {
     samtools_sort_spike_in(sam_files_pe_ch, lambda_genome_tuple)
 
     //samtools_sort_spike_in.out.bam_index_tuple.view()
-
+    /*
     flagstat_log_ch = samtools_sort_spike_in.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
     norm_stats_txt_ch = samtools_sort_spike_in.out.norm_stats_txt.collect()
     tsv_SN_stats_ch = samtools_sort_spike_in.out.tsv_SN_stats.collect()
-
+    */
     spike_in_bam_index_tuple_ch = samtools_sort_spike_in.out.bam_index_tuple
 
     if (params.ATAC) {
@@ -554,11 +555,11 @@ workflow pe_yeast_spike_in_workflow {
     samtools_sort_spike_in(sam_files_pe_ch, yeast_genome_tuple)
 
     //samtools_sort_spike_in.out.bam_index_tuple.view()
-
+    /*
     flagstat_log_ch = samtools_sort_spike_in.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
     norm_stats_txt_ch = samtools_sort_spike_in.out.norm_stats_txt.collect()
     tsv_SN_stats_ch = samtools_sort_spike_in.out.tsv_SN_stats.collect()
-
+    */
     spike_in_bam_index_tuple_ch = samtools_sort_spike_in.out.bam_index_tuple
 
 
@@ -733,9 +734,11 @@ workflow se_t7_spike_in_workflow {
     sorted_bams_ch = samtools_sort_spike_in.out.sorted_bams
     indexed_bams_ch = samtools_sort_spike_in.out.indexed_bams
     spike_in_bam_index_tuple_ch = samtools_sort_spike_in.out.bam_index_tuple
-    flagstat_log_ch = samtools_sort_spike_in.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+    
+    /*flagstat_log_ch = samtools_sort_spike_in.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
     norm_stats_txt_ch = samtools_sort_spike_in.out.norm_stats_txt.collect()
     tsv_SN_stats_ch = samtools_sort_spike_in.out.tsv_SN_stats.collect()
+    */
     // if you want to filter black list use the param --BL in the command line when calling nextflow
     
     // dont want to do bl yet
@@ -982,9 +985,12 @@ workflow se_lambda_spike_in_workflow {
     sorted_bams_ch = samtools_sort_spike_in.out.sorted_bams
     indexed_bams_ch = samtools_sort_spike_in.out.indexed_bams
     spike_in_bam_index_tuple_ch = samtools_sort_spike_in.out.bam_index_tuple
+    
+    /*
     flagstat_log_ch = samtools_sort_spike_in.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
     norm_stats_txt_ch = samtools_sort_spike_in.out.norm_stats_txt.collect()
     tsv_SN_stats_ch = samtools_sort_spike_in.out.tsv_SN_stats.collect()
+    */
     // if you want to filter black list use the param --BL in the command line when calling nextflow
     
     // dont want to do bl yet
@@ -1231,9 +1237,12 @@ workflow se_yeast_spike_in_workflow {
     sorted_bams_ch = samtools_sort_spike_in.out.sorted_bams
     indexed_bams_ch = samtools_sort_spike_in.out.indexed_bams
     spike_in_bam_index_tuple_ch = samtools_sort_spike_in.out.bam_index_tuple
+    
+    /*
     flagstat_log_ch = samtools_sort_spike_in.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
     norm_stats_txt_ch = samtools_sort_spike_in.out.norm_stats_txt.collect()
     tsv_SN_stats_ch = samtools_sort_spike_in.out.tsv_SN_stats.collect()
+    */
     // if you want to filter black list use the param --BL in the command line when calling nextflow
     
     // dont want to do bl yet
