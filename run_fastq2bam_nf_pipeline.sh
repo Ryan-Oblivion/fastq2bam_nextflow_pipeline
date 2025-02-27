@@ -52,6 +52,8 @@ conda activate nextflow_three
 # NOTE: path to the peak files /lustre/fs4/home/ascortea/store/ascortea/beds
      # then get the different peak directories IMR90, k562, BJ subdirectories hold these peak files
 
+# NEW NOTE: I want to add another process or workflow where i take all the bam_index_tuple_ch that made it to the end of the fastq to bam pipeline and send them to fastqc then multi-qc to get a good html file showing the stats.
+#          well neither fastqc nor multiqc takes bam files to be able to do this
 
 #nextflow run fastq2bam_nextflow_pipeline.nf -profile 'nasa_pipeline ' \
 #-resume \

@@ -1,4 +1,6 @@
 
+
+
 // note: this workflow is in the workflow dir so i need to go back one dir to get the modules dir
 include {breakDensityWrapper_process} from '../modules/fastq2bam_dna_modules.nf'
 
@@ -22,9 +24,13 @@ workflow breakDensityWrapper_workflow {
     only_bams.view()
 
     // this workflow will take the files from the main workflow and pass them to the breakDensityWrapper process/module
+    if (params.test) {
+        breakDensityWrapper_process(only_bams.collect(), peak_files.flatten().take(1)) // just for test, but i just want to take 1 peak file
+    }
+    else {
+        breakDensityWrapper_process(only_bams.collect(), peak_files.flatten())
 
-    breakDensityWrapper_process(only_bams.collect(), peak_files.flatten().take(1)) // just for test, but i just want to take 1 peak file
-
+    }
 
 }
 
