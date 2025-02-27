@@ -18,6 +18,7 @@ include {
     bwa_index_genome;
     bwa_align_SE;
     samtools_sort;
+    bam_log_calc;
     deeptools_make_bed;
     bedtools_filt_blacklist;
     samtools_bl_index;
@@ -238,9 +239,9 @@ workflow {
             sorted_bams_ch = samtools_sort.out.sorted_bams
             indexed_bams_ch = samtools_sort.out.indexed_bams
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
-            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
-            norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
-            tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
+            // flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+            // norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
+            // tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
             // if you want to filter black list use the param --BL in the command line when calling nextflow
             if ( params.BL ) {
 
@@ -453,9 +454,9 @@ workflow {
             //samtools_sort.out.bam_index_tuple.view()
 
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
-            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
-            norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
-            tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
+            // flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+            // norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
+            // tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
 
             // this will give a blacklist filtered bam but i need to index it again
             bedtools_filt_blacklist(bam_index_tuple_ch, blacklist_ch)
@@ -530,9 +531,9 @@ workflow {
 
             //samtools_sort.out.bam_index_tuple.view()
 
-            flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
-            norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
-            tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
+            // flagstat_log_ch = samtools_sort.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+            // norm_stats_txt_ch = samtools_sort.out.norm_stats_txt.collect()
+            // tsv_SN_stats_ch = samtools_sort.out.tsv_SN_stats.collect()
 
             bam_index_tuple_ch = samtools_sort.out.bam_index_tuple
             
@@ -622,11 +623,14 @@ workflow {
         samtools_index_sort(atac_shift_bam_ch)
 
         // so now name the tuple channel output appropriately 
-        atac_shift_bam_index_ch = samtools_index_sort.out.bam_index_tuple // i changed the emit ch to just be bam_index_tuple
+        //atac_shift_bam_index_ch = samtools_index_sort.out.bam_index_tuple // i changed the emit ch to just be bam_index_tuple
+
+        // just make it bam_index_tuple_ch
+        bam_index_tuple_ch = samtools_index_sort.out.bam_index_tuple
 
         // now making the bed files for atac seq
 
-        deeptools_make_bed(atac_shift_bam_index_ch)
+        deeptools_make_bed(bam_index_tuple_ch)
 
         //deeptools_make_bed.out.bed_files_normalized.view()
 
@@ -652,7 +656,7 @@ workflow {
 
 
     // making a multiqc process for the samtools flagstat log files. this should be able to take the flagstat_log_ch from any part of the choosen paths
-    multiqc_bam_stats(flagstat_log_ch, norm_stats_txt_ch)
+    //multiqc_bam_stats(flagstat_log_ch, norm_stats_txt_ch)
 
 
     
@@ -681,23 +685,23 @@ workflow {
     // I want to make a log file with all the stats from using samtools stats on each bam file
 
     //tsv_SN_stats_ch.view{"These are the tsv files $it"}
-    tsv_SN_stats_ch
-        .map{ file -> tuple(file.baseName, file)}
-        .set{tsv_SN_stats_tuple_ch}
-        //.view {"These are the files with their basenames in a tuple transposed: $it"} // i dont need this transposed, i want all the files and names
+    // tsv_SN_stats_ch
+    //     .map{ file -> tuple(file.baseName, file)}
+    //     .set{tsv_SN_stats_tuple_ch}
+    //     //.view {"These are the files with their basenames in a tuple transposed: $it"} // i dont need this transposed, i want all the files and names
         
-    //tsv_SN_stats_tuple_ch.view{"These are the files with their basenames in a tuple: $it"}
+    // //tsv_SN_stats_tuple_ch.view{"These are the files with their basenames in a tuple: $it"}
 
 
-    if (params.PE) {
+    // if (params.PE) {
 
-        py_calc_stats_log(tsv_SN_stats_tuple_ch)
-    }
-    if (params.SE) {
+    //     py_calc_stats_log(tsv_SN_stats_tuple_ch)
+    // }
+    // if (params.SE) {
 
-        py_calc_stats_log(tsv_SN_stats_tuple_ch)
+    //     py_calc_stats_log(tsv_SN_stats_tuple_ch)
 
-    }
+    // }
 
     
     // looking to run the spike_in workflow
@@ -713,14 +717,14 @@ workflow {
 
                 pe_t7_spike_in_workflow()
                 // now getting the output channels from the workflows just incase i need to use them in a downstream analysis
-                pe_t7_bam_index_tuple_ch = pe_t7_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                pe_t7_bam_index_tuple_ch = pe_t7_spike_in_workflow.out.spike_in_bam_index_tuple_ch 
                 pe_t7_bed_files = pe_t7_spike_in_workflow.out.spike_in_bed_files_norm_ch
             }
             if (params.lambda) {
 
                 pe_lambda_spike_in_workflow()
 
-                pe_lambda_bam_index_tuple_ch = pe_lambda_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                pe_lambda_bam_index_tuple_ch = pe_lambda_spike_in_workflow.out.spike_in_bam_index_tuple_ch 
                 pe_lambda_bed_files = pe_lambda_spike_in_workflow.out.spike_in_bed_files_norm_ch
             }
             if (params.yeast) {
@@ -728,7 +732,7 @@ workflow {
                 // so i would put the yeast spike in workflow here, for example.
                 pe_yeast_spike_in_workflow()
 
-                pe_yeast_bam_index_tuple_ch = pe_yeast_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                pe_yeast_bam_index_tuple_ch = pe_yeast_spike_in_workflow.out.spike_in_bam_index_tuple_ch 
                 pe_yeast_bed_files = pe_yeast_spike_in_workflow.out.spike_in_bed_files_norm_ch
             }
         }
@@ -739,20 +743,20 @@ workflow {
 
                 se_t7_spike_in_workflow()
 
-                se_t7_bam_index_tuple_ch = se_t7_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                se_t7_bam_index_tuple_ch = se_t7_spike_in_workflow.out.spike_in_bam_index_tuple_ch 
                 se_t7_bed_files = se_t7_spike_in_workflow.out.spike_in_bed_files_norm_ch
             }
             if (params.lambda) {
 
                 se_lambda_spike_in_workflow()
-                se_lambda_bam_index_tuple_ch = se_lambda_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                se_lambda_bam_index_tuple_ch = se_lambda_spike_in_workflow.out.spike_in_bam_index_tuple_ch 
                 se_lambda_bed_files = se_lambda_spike_in_workflow.out.spike_in_bed_files_norm_ch
             }           
             if (params.yeast) {
 
                 // so i would put the yeast spike in workflow here, for example.
                 se_yeast_spike_in_workflow()
-                se_yeast_bam_index_tuple_ch = se_yeast_spike_in_workflow.out.spike_in_bam_index_tuple_ch
+                se_yeast_bam_index_tuple_ch = se_yeast_spike_in_workflow.out.spike_in_bam_index_tuple_ch 
                 se_yeast_bed_files = se_yeast_spike_in_workflow.out.spike_in_bed_files_norm_ch
             }
 
@@ -765,6 +769,69 @@ workflow {
 
     }
 
+
+    if (params.PE) {
+        // join the normal aligned reads bam with the spike in bam
+
+        // first just initilize the channels to empty channels if their parameters were not set
+        // doing this works
+        if (!params.t7) { pe_t7_bam_index_tuple_ch = Channel.empty()}
+        if (!params.lambda) { pe_lambda_bam_index_tuple_ch = Channel.empty()}
+        if (!params.yeast) { pe_yeast_bam_index_tuple_ch = Channel.empty()}
+        
+        all_spike_bam_index_tuple_ch = bam_index_tuple_ch.concat(pe_t7_bam_index_tuple_ch,
+                                                pe_lambda_bam_index_tuple_ch, 
+                                                pe_yeast_bam_index_tuple_ch
+        )
+        
+        //all_spike_bam_index_tuple_ch.view()
+    }else if (params.SE) {
+
+        //doing the same for the single end path
+        if (!params.t7) { se_t7_bam_index_tuple_ch = Channel.empty()}
+        if (!params.lambda) { se_lambda_bam_index_tuple_ch = Channel.empty()}
+        if (!params.yeast) { se_yeast_bam_index_tuple_ch = Channel.empty()}
+
+        all_spike_bam_index_tuple_ch = bam_index_tuple_ch.concat(
+                                                se_t7_bam_index_tuple_ch,
+                                                se_lambda_bam_index_tuple_ch,
+                                                se_yeast_bam_index_tuple_ch
+        )
+        
+        //all_spike_bam_index_tuple_ch.view()
+    }
+
     
-    
+    // Now I want to take the bam_index_tuple or the atac_shift_bam_index_ch  and get the stats. percent mitochondrial alignment, number of reads, percent reads aligned
+    // just take a few of the stats from the py_calc_sats_log
+
+    //bam_log_calc(bam_index_tuple_ch)
+    bam_log_calc(all_spike_bam_index_tuple_ch)
+
+    flagstat_log_ch = bam_log_calc.out.flag_stats_log.collect() // will make another process or send this to the multiqc process
+    norm_stats_txt_ch = bam_log_calc.out.norm_stats_txt.collect()
+    tsv_SN_stats_ch = bam_log_calc.out.tsv_SN_stats.collect()
+
+    // making a multiqc process for the samtools flagstat log files. this should be able to take the flagstat_log_ch from any part of the choosen paths
+    multiqc_bam_stats(flagstat_log_ch, norm_stats_txt_ch)
+
+    tsv_SN_stats_ch
+        .map{ file -> tuple(file.baseName, file)}
+        .set{tsv_SN_stats_tuple_ch}
+        //.view {"These are the files with their basenames in a tuple transposed: $it"} // i dont need this transposed, i want all the files and names
+
+    //tsv_SN_stats_tuple_ch.view{"This is the channel tuple $it"}
+
+    //tsv_SN_stats_tuple_ch.view{"These are the files with their basenames in a tuple: $it"}
+
+
+    if (params.PE) {
+
+        py_calc_stats_log(tsv_SN_stats_tuple_ch)
+    }
+    if (params.SE) {
+
+        py_calc_stats_log(tsv_SN_stats_tuple_ch)
+
+    }
 }

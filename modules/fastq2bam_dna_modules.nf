@@ -341,11 +341,17 @@ process samtools_sort {
 
 
     
+    if (!params.BL) {
+        publishDir "${params.base_out_dir}/sorted_bam_files", mode: 'copy', pattern: '*_sorted.bam'
+        publishDir "${params.base_out_dir}/sorted_bam_files", mode: 'copy', pattern: '*.{bai, csi}'
 
-    publishDir "${params.base_out_dir}/sorted_bam_files", mode: 'copy', pattern: '*_sorted.bam'
-    publishDir "${params.base_out_dir}/sorted_bam_files", mode: 'copy', pattern: '*.{bai, csi}'
-    publishDir "${params.base_out_dir}/flag_stat_log", mode: 'copy', pattern: '*stats.log'
-    publishDir "${params.base_out_dir}/stats_tsv_files", mode: 'copy', pattern: '*stats.tsv'
+    }else {
+
+        
+
+    }
+    // publishDir "${params.base_out_dir}/flag_stat_log", mode: 'copy', pattern: '*stats.log'
+    // publishDir "${params.base_out_dir}/stats_tsv_files", mode: 'copy', pattern: '*stats.tsv'
 
     
 
@@ -366,9 +372,9 @@ process samtools_sort {
     path("*.bai"), emit: indexed_bams
     tuple path("*_sorted.bam"), path("*.bai"), emit: bam_index_tuple
 
-    path("*stats.log"), emit: flag_stats_log
-    path("*stats.txt"), emit: norm_stats_txt
-    path("*stats.tsv"), emit: tsv_SN_stats
+    // path("*stats.log"), emit: flag_stats_log
+    // path("*stats.txt"), emit: norm_stats_txt
+    // path("*stats.tsv"), emit: tsv_SN_stats
 
     script:
 
@@ -377,10 +383,10 @@ process samtools_sort {
     out_bam_name_sort = "${sam_files.baseName}_name_ordered.bam"
     out_bam_coor_sort = "${sam_files.baseName}_filt_coor_sorted.bam"
     out_bam_fixmate = "${sam_files.baseName}_fixmate.bam"
-    out_bam_final = "${sam_files.baseName}_markdup_filt_coor_sorted.bam"
-    flagstats_log = "${sam_files.baseName}_flag_stats.log"
-    samtools_stats_log = "${sam_files.baseName}_stats.txt"
-    tsv_file_with_stats = "${sam_files.baseName}_SN_stats.tsv"
+    // out_bam_final = "${sam_files.baseName}_markdup_filt_coor_sorted.bam"
+    // flagstats_log = "${sam_files.baseName}_flag_stats.log"
+    // samtools_stats_log = "${sam_files.baseName}_stats.txt"
+    // tsv_file_with_stats = "${sam_files.baseName}_SN_stats.tsv"
 
 
     
@@ -460,17 +466,18 @@ process samtools_sort {
     -b \
     "${out_bam_coor_sort}"
 
-    samtools flagstat \
-    "${out_bam_coor_sort}" \
-    > "${flagstats_log}"
+    #samtools flagstat \
+    #"\${out_bam_coor_sort}" \
+    #> "\${flagstats_log}"
 
     # adding another way to get stats from each bam file
-    samtools stats \
-    "${out_bam_coor_sort}" \
-    > "${samtools_stats_log}"
+    #samtools stats \
+    #"\${out_bam_coor_sort}" \
+    #> "\${samtools_stats_log}"
 
     # now only putting the stats into a tsv file
-    less "${samtools_stats_log}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats}"
+    #less "\${samtools_stats_log}" | grep ^SN | cut -f 2-3 >  "\${tsv_file_with_stats}"
+    
     """
 
 
@@ -478,6 +485,58 @@ process samtools_sort {
 
 
     
+}
+
+process bam_log_calc {
+
+    label 'normal_small_resources'
+
+    conda '/ru-auth/local/home/rjohnson/miniconda3/envs/samtools-1.21_rj'
+
+    publishDir "${params.base_out_dir}/flag_stat_log", mode: 'copy', pattern: '*stats.log'
+    publishDir "${params.base_out_dir}/stats_tsv_files", mode: 'copy', pattern: '*stats.tsv'
+
+
+    input:
+    tuple path(bam), path(index_bam)
+
+
+    output:
+    path("*stats.log"), emit: flag_stats_log
+    path("*stats.txt"), emit: norm_stats_txt
+    path("*stats.tsv"), emit: tsv_SN_stats
+
+
+
+    script:
+    flagstats_log = "${bam.baseName}_flag_stats.log"
+    samtools_stats_log = "${bam.baseName}_stats.txt"
+    tsv_file_with_stats = "${bam.baseName}_SN_stats.tsv"
+
+
+    """
+    #!/usr/bin/env bash
+
+    # using samtools flagstat: generate log files so i can use multiqc to get stats of all files into one html file
+    # no parameters needed. just need to give the final bam file that went through all the processing
+
+
+    samtools flagstat \
+    "${bam}" \
+    > "${flagstats_log}"
+
+    # adding another way to get stats from each bam file
+    samtools stats \
+    "${bam}" \
+    > "${samtools_stats_log}"
+
+    # now only putting the stats into a tsv file
+    less "${samtools_stats_log}" | grep ^SN | cut -f 2-3 >  "${tsv_file_with_stats}"
+
+
+
+
+    """
 }
 
 
@@ -633,8 +692,8 @@ process samtools_bl_index {
     //     publishDir "${params.base_out_dir}/blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
     // }
 
-    publishDir "${params.base_out_dir}/blacklist_filt_bam", mode: 'copy', pattern: '*.bai'
-    publishDir "${params.base_out_dir}/blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
+    publishDir "${params.base_out_dir}/sorted_bam_files/blacklist_filt_bam", mode: 'copy', pattern: '*.bai'
+    publishDir "${params.base_out_dir}/sorted_bam_files/blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
     
     
 
@@ -1057,14 +1116,14 @@ process samtools_index_sort {
 
     if (params.ATAC && params.BL) {
         // I want to put both the bam and the index (bai) in the same channel
-        publishDir "${params.base_out_dir}/ATAC_blacklist_filt_bam", mode: 'copy', pattern: '*.bai'
-        publishDir "${params.base_out_dir}/ATAC_blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
+        publishDir "${params.base_out_dir}/sorted_bam_files/ATAC_blacklist_filt_bam", mode: 'copy', pattern: '*.bai'
+        publishDir "${params.base_out_dir}/sorted_bam_files/ATAC_blacklist_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
 
     }
     else if(params.ATAC) {
 
-        publishDir "${params.base_out_dir}/ATAC_filt_bam", mode: 'copy', pattern: '*.bai'
-        publishDir "${params.base_out_dir}/ATAC_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
+        publishDir "${params.base_out_dir}/sorted_bam_files/ATAC_filt_bam", mode: 'copy', pattern: '*.bai'
+        publishDir "${params.base_out_dir}/sorted_bam_files/ATAC_filt_bam", mode: 'copy', pattern: '*_sort2.bam'
     }
 
 
@@ -1262,15 +1321,29 @@ process py_calc_stats_log {
     """
     #!/usr/bin/env python
            
+    # for testing purposes on the hpc use: 
+    # list_tsv_files = ['results_PE/stats_tsv_files/B_HB1_0GyP_T1_S00_filt_r1_r2_SN_stats.tsv','results_PE/stats_tsv_files/I_HB2_PLC_T1_S00_filt_r1_r2_SN_stats.tsv']
+    # list_of_names = ['B_HB1_0GyP_T1_S00_filt_r1_r2_SN_stats', 'I_HB2_PLC_T1_S00_filt_r1_r2_SN_stats']
 
     import pandas as pd
 
+    print("before the split : ${tsv_sn_stats}")
+    print("before the split: ${name_of_file}")
+    
+
+    # need to remove the brackets and split
+    str_names = "${name_of_file}"  #.strip('[]').split(',')
+    new_list_names = str_names.strip('[]').split(',')
+
     list_tsv_files = "${tsv_sn_stats}".split()
-    list_of_names = "${name_of_file}".split()
+    #list_of_names = "\${name_of_file}".split()
+    
+    print("after the split:",  list_tsv_files)
+    print("after the split:",  new_list_names)
 
     files_dict_df = {}
 
-    for name, file in zip(list_of_names, list_tsv_files):
+    for name, file in zip(new_list_names, list_tsv_files):
         files_dict_df[name] = pd.read_table(file, header=None, sep='\t').set_index(0).T
 
     # concat the dictionary of dataframes
@@ -1279,8 +1352,25 @@ process py_calc_stats_log {
     # now  putting sample names in the df
     combined_stats_df.insert(0, "sample_names", files_dict_df.keys())
 
+    # use this code below to see the column names to choose from
+    # combined_stats_df.columns
+
+    final_log_stats_df = combined_stats_df.loc[:, ['sample_names','raw total sequences:','reads mapped:','reads mapped and paired:', 'reads duplicated:', 'reads MQ0:', 'percentage of properly paired reads (%):']]
+
+    # calculating the percentage of reads mapped, and adding it to a column called percent_reads_mapped
+    final_log_stats_df['percent_reads_mapped'] = (final_log_stats_df.iloc[:,2]/final_log_stats_df.iloc[:,1])*100
+
+    # calculating the percentage of reads duplicated and adding that as a column
+    final_log_stats_df['percent_reads_duplicated'] = (final_log_stats_df.iloc[:,4]/final_log_stats_df.iloc[:,1])*100
+
+
+    # right before I make the log file I want to clean up the column names and replace and spaces with an underscore
+    # then also remove the colons 
+    final_log_stats_df.columns = final_log_stats_df.columns.str.replace(' ','_')
+    final_log_stats_df.columns = final_log_stats_df.columns.str.replace(':','')
+
     # writing the tsv
-    combined_stats_df.to_csv("${log_file_out}", sep = '\t')
+    final_log_stats_df.to_csv("${log_file_out}", sep = '\t')
 
     
    
