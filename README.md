@@ -4,6 +4,16 @@ Welcome to NEXDEP our Nextflow DNA Epigenomic Pipeline. You can take your DNA ba
 
 ### This is the pipeline so far, it will take your dna based reads and preprocess them from the fastq to bam level. The pipeline handles ATAC data and shifts the genomic coordinates in preprocessing. There are many parameters so read through them and choose the best one that works for your project. This pipeline so far includes workflows specific for hera's project with NASA data, so those parameters will only be used for that project. I will add workflows that will take the dna based bam files and call peaks and other normal downstream analysis methods for this type of data. MORE COMMING SOON
 
+# How to prepare your data (naming of files/fastqs )
+
+```
+This is the standart naming scheme that will allow the pipeline to take your fastq files, and for workflows I make in the future that take bam files; you will have to follow this naming scheme
+
+I will call ev
+
+```
+
+
 # How to run the pipeline
 
 **Make an sbatch script if you're on an HPC with SLURM**
