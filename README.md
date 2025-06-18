@@ -25,6 +25,12 @@ H1low_H3k27me3_r1.fastq
 scrm_H3k9me3_r1.fastq
 H1low_H3k9me3_r1.fastq
 
+or bam example:
+scrm_H3k27me3_r1.bam
+H1low_H3k27me3_r1.bam
+scrm_H3k9me3_r1.bam
+H1low_H3k9me3_r1.bam
+
 
 
 ```
