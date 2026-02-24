@@ -62,6 +62,44 @@ conda activate nextflow_three
 # --depth_intersection : this new parameter should be for anyone that has alignment bam files and want to check it's depth by seeing how many reads intersect with a given set of already created peak files
 # --end_seq or --gloe_seq : the end_seq data and the gloe_seq data names are ordered differently have the user specify if end seq or gloe seq so i can use the correct order for geting name metadata
 
+
+
+
+############ for hera new cut and tag data ##################
+
+nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
+-resume \
+--PE \
+--BL \
+--blacklist_path '/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg38/blacklist/hg38-blacklist.v2.bed' \
+--paired_end_reads '/lustre/fs4/risc_lab/store/risc_data/2025-08-14_HC_AO_JY_pool/fastq/HC_cutnTag_H1low_k27me3_k36me2/**/*_{R1,R2}*' \
+--use_effectiveGenomeSize \
+--num_effectiveGenomeSize '2913022398' \
+--genome '/lustre/fs4/risc_lab/store/risc_data/downloaded/hg38/genome/Sequence/WholeGenomeFasta/genome.fa' \
+--rpgc_bigwig \
+--bam_cov_binSize '150' \
+--bam_cov_scaleFactor '2'
+
+
+######### for the flow chart ##########################
+
+# nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
+# -resume \
+# --PE \
+# --BL \
+# --blacklist_path '/rugpfs/fs0/risc_lab/store/risc_data/downloaded/hg38/blacklist/hg38-blacklist.v2.bed' \
+# --paired_end_reads '/lustre/fs4/risc_lab/store/risc_data/2025-08-14_HC_AO_JY_pool/fastq/HC_cutnTag_H1low_k27me3_k36me2/**/*_{R1,R2}*' \
+# --use_effectiveGenomeSize \
+# --num_effectiveGenomeSize '2913022398' \
+# --genome '/lustre/fs4/risc_lab/store/risc_data/downloaded/hg38/genome/Sequence/WholeGenomeFasta/genome.fa' \
+# -with-dag fastq2bam_nf_pipeline_flowchart.pdf \
+# -preview 
+
+
+########################################################################
+
+
+
 ######################################
 
 # NOTE: path to the peak files /lustre/fs4/home/ascortea/store/ascortea/beds
@@ -114,16 +152,18 @@ conda activate nextflow_three
 
 
 ##################### For GLOE seq data ##########################################
-nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
--resume \
---PE \
---BL \
---paired_end_reads '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*' \
---use_effectiveGenomeSize \
---num_effectiveGenomeSize '2864785220' \
---depth_intersection \
---gloe_seq \
---calc_break_density
+# nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
+# -resume \
+# --PE \
+# --BL \
+# --paired_end_reads '/rugpfs/fs0/risc_lab/store/hcanaj/HC_GLOEseq_Novaseq_010925/fastqs_read1_read2/*_{R1,R2}*' \
+# --use_effectiveGenomeSize \
+# --num_effectiveGenomeSize '2864785220' \
+# --depth_intersection \
+# --gloe_seq \
+# --spike_in \
+# --lambda \
+# --t7
 
 # dont use --calc_break_density when getting the spike in stuff
 
