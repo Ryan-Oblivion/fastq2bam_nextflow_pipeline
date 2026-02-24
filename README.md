@@ -73,6 +73,35 @@ nextflow run fastq2bam_nextflow_pipeline.nf -profile 'fastq2bam2_pipeline' \
 
 # Parameters Section
 
+**Not required but good to put**
+```
+This will put the string that you write at the start of the file name for the table that calculates read depth of experiment
+
+--expr_type : a short string that descirbes your experiment EX: cutntag_h3k27me3_HC
+
+```
+
+**Parameters for making bigwigs and bedgraphs using deeptools bed_coverage**
+```
+Use these to set the normalization method deeptools will use for both bigwig and bedgraph
+--cpm_bigwig
+--rpgc_bigwig
+--rpkm_bigwig 
+--bpm_bigwig
+
+Use this to set the bin size deeptools will use
+--bam_cov_binSize : default is '100'
+
+Use this to set the scaling factor
+--bam_cov_scaleFactor: default is '1'
+
+Only set this if you dont want the pipeline to use extend reads in deeptools bam_coverage and put an empty string ('') ex: --extend_reads_deeptools ''
+when not set the pipeline will use --extendReads parameter, but if in single end mode then pipeline will set extend reads to 200 as default. to change this use the --final_extend_reads_len parameter with your desired read length to extend to
+--extend_reads_deeptools
+
+--final_extend_reads_len : default '200', but in general you only need this for sigle end data and set the number. do not need this or --extend_reads_deeptools if you are using PE (pair end) data.
+```
+
 **Parameters for Pair-End Data**
 
 ```
